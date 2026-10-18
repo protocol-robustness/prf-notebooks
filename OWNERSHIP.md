@@ -11,11 +11,7 @@
 
 ## Runtime dependencies
 
-The notebook sources expect a PRF integration checkout as their host. They
-refer to `resolver-sim.*` namespaces and open paths beneath `data/`, `etc/`,
-`results/`, and `scenarios/`. `deps.edn` exposes notebook and helper source paths
-for a host project; it does not declare or copy the PRF simulation or data
-repositories.
+The notebook sources declare direct library dependencies in deps.edn and import PRF-owned resolver-sim.* namespaces where classified as prf-hosted. The runner verifies the opt-in PRF Git alias against the source pin in data/notebook-runtime.edn, prepares that revision in a managed cache, and sets its root explicitly for relative resource reads. Neither host implementations nor datasets are copied into this repository.
 
 The PRF integration workspace has not yet been changed to consume this
 repository. Migration must pin an immutable Git revision, update Clerk and

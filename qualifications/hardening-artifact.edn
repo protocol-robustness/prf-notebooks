@@ -1,0 +1,68 @@
+{:evaluation/output
+ {:html-files ["index.html"],
+  :edn-output-files ["index.edn"],
+  :expected-markers ["HARDENING EVIDENCE"],
+  :markers-found? true,
+  :canonical/example-root nil,
+  :sha256
+  {"index.html"
+   "07c744939b2c6f608db126f1689f5d88b6ad5b8cd5e8762268a7bc70fb8289ca",
+   "index.edn"
+   "3b43d76eaca8ab2476154979f8e10810f6e522a40bf63a0f0e09aa25a5031ebb"}},
+ :resource/root "/tmp/prf-notebooks-final-source",
+ :fixture/identities nil,
+ :dependency/classpath
+ ["maven:hiccup/hiccup/2.0.0-RC3/hiccup-2.0.0-RC3.jar"
+  "maven:io/github/nextjournal/clerk/0.18.1158/clerk-0.18.1158.jar"
+  "maven:metosin/malli/0.17.0/malli-0.17.0.jar"
+  "maven:org/clojure/clojure/1.12.0/clojure-1.12.0.jar"
+  "maven:org/clojure/data.json/2.4.0/data.json-2.4.0.jar"
+  "maven:babashka/fs/0.5.27/fs-0.5.27.jar"
+  "maven:babashka/process/0.4.16/process-0.4.16.jar"
+  "maven:borkdude/edamame/1.4.28/edamame-1.4.28.jar"
+  "maven:com/nextjournal/beholder/1.0.3/beholder-1.0.3.jar"
+  "maven:com/pngencoder/pngencoder/0.13.1/pngencoder-0.13.1.jar"
+  "maven:com/taoensso/nippy/3.4.2/nippy-3.4.2.jar"
+  "maven:http-kit/http-kit/2.8.0/http-kit-2.8.0.jar"
+  "maven:io/github/babashka/sci.nrepl/0.0.2/sci.nrepl-0.0.2.jar"
+  "maven:io/github/nextjournal/markdown/0.7.189/markdown-0.7.189.jar"
+  "maven:juji/editscript/0.6.4/editscript-0.6.4.jar"
+  "maven:mvxcvi/alphabase/3.0.185/alphabase-3.0.185.jar"
+  "maven:mvxcvi/multiformats/1.0.125/multiformats-1.0.125.jar"
+  "maven:org/babashka/http-client/0.4.23/http-client-0.4.23.jar"
+  "maven:org/clojure/java.classpath/1.0.0/java.classpath-1.0.0.jar"
+  "maven:org/flatland/ordered/1.15.12/ordered-1.15.12.jar"
+  "maven:rewrite-clj/rewrite-clj/1.1.45/rewrite-clj-1.1.45.jar"
+  "maven:weavejester/dependency/0.2.1/dependency-0.2.1.jar"
+  "maven:borkdude/dynaload/0.3.5/dynaload-0.3.5.jar"
+  "maven:fipp/fipp/0.6.27/fipp-0.6.27.jar"
+  "maven:mvxcvi/arrangement/2.1.0/arrangement-2.1.0.jar"
+  "maven:org/clojure/test.check/1.1.1/test.check-1.1.1.jar"
+  "maven:org/clojure/core.specs.alpha/0.4.74/core.specs.alpha-0.4.74.jar"
+  "maven:org/clojure/spec.alpha/0.5.238/spec.alpha-0.5.238.jar"
+  "maven:org/clojure/tools.reader/1.5.2/tools.reader-1.5.2.jar"
+  "maven:io/methvin/directory-watcher/0.17.3/directory-watcher-0.17.3.jar"
+  "maven:com/taoensso/encore/3.112.0/encore-3.112.0.jar"
+  "maven:io/airlift/aircompressor/0.27/aircompressor-0.27.jar"
+  "maven:org/tukaani/xz/1.9/xz-1.9.jar"
+  "maven:nrepl/bencode/1.1.0/bencode-1.1.0.jar"
+  "maven:org/commonmark/commonmark/0.24.0/commonmark-0.24.0.jar"
+  "maven:org/commonmark/commonmark-ext-autolink/0.24.0/commonmark-ext-autolink-0.24.0.jar"
+  "maven:org/commonmark/commonmark-ext-footnotes/0.24.0/commonmark-ext-footnotes-0.24.0.jar"
+  "maven:org/commonmark/commonmark-ext-gfm-strikethrough/0.24.0/commonmark-ext-gfm-strikethrough-0.24.0.jar"
+  "maven:org/commonmark/commonmark-ext-gfm-tables/0.24.0/commonmark-ext-gfm-tables-0.24.0.jar"
+  "maven:org/commonmark/commonmark-ext-task-list-items/0.24.0/commonmark-ext-task-list-items-0.24.0.jar"
+  "maven:org/clojure/core.rrb-vector/0.1.2/core.rrb-vector-0.1.2.jar"
+  "maven:net/java/dev/jna/jna/5.12.1/jna-5.12.1.jar"
+  "maven:org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar"
+  "maven:com/taoensso/truss/1.11.0/truss-1.11.0.jar"
+  "maven:org/nibor/autolink/autolink/0.11.0/autolink-0.11.0.jar"],
+ :source/revision "bf12641a1830fdbc95195fdf7b69f230fa3c074a",
+ :resource/root-source-revision nil,
+ :namespace-check nil,
+ :notebook/class :standalone,
+ :prf-host/revision nil,
+ :notebook/id :hardening-artifact,
+ :notebook/path "notebooks/hardening_artifact.clj",
+ :dependency/source-pins {},
+ :evaluation/status :passed}

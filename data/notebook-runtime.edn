@@ -1,0 +1,78 @@
+{:schema-version 1,
+ :prf-host
+ {:git/url
+  "https://github.com/protocol-robustness/protocol-robustness-framework.git",
+  :git/sha "0c0134c4b34f121c8b2201657270198425f89f28",
+  :fixture-blobs
+  {"data/notebooks.edn" "90f243007ccc803a4e4cd965e7d6dd3ed80b16c9"
+   "data/fixtures/traces" "e550acdeb979f5d3ff6005a98919f9de5469b6cd"
+   "data/fixtures/golden" "9445d7b4a01be4037472e5fa073260eaf91d341f"
+   "data/fixtures/suites" "560de15cfb10af9b682d86bacfab94a2e81f23f1"}},
+ :packages
+ {:canonical
+  {:git/url "https://github.com/protocol-robustness/prf-canonical.git",
+   :git/sha "5e2b520feca812b049ba397b7b3681963c66a48c",
+   :deps/root "clj"},
+  :allocation
+  {:git/url
+   "https://github.com/protocol-robustness/prf-pro-rata-allocation.git",
+   :git/sha "0b7b2a8badbaa2c345e8b9626aa68907510fc52f",
+   :deps/root "clj"}},
+ :qualification-roots
+ {:portable-canonical-package
+  "0937f59db7f2eb1089af353ac0b66fda237aaecbfc60eb6cd39caed8d296629b"},
+ :notebooks
+ {:not-admitted :prf-hosted,
+  :report :prf-hosted,
+  :state-after-assurance-workbench :prf-hosted,
+  :equilibrium-artifact :prf-hosted,
+  :game-theory-artifact :prf-hosted,
+  :composed-pro-rata-v2-settlement :prf-hosted,
+  :verification-overview :standalone,
+  :withdrawal-observatory :standalone,
+  :consecutive-concurrency-workbench :prf-hosted,
+  :yield-shortfall-partial-withdrawal-fills :prf-hosted,
+  :protocol-provenance :prf-hosted,
+  :research-network-work-binding :prf-hosted,
+  :benchmark-protocol-robustness :prf-hosted,
+  :workbench-v2 :prf-hosted,
+  :dispute-resolution :prf-hosted,
+  :component-gallery :prf-hosted,
+  :canonical-cancellation :prf-hosted,
+  :resubmission-chain :prf-hosted,
+  :canonical-framing :prf-hosted,
+  :clean-room-not-admitted :prf-hosted,
+  :researcher-interaction-topology :prf-hosted,
+  :evm-dependency-provenance :prf-hosted,
+  :world-structure-workbench :prf-hosted,
+  :notebook-comparison :prf-hosted,
+  :workbench-production :prf-hosted,
+  :not-governance :prf-hosted,
+  :invariant-failures :prf-hosted,
+  :evidence-graph-viewer :prf-hosted,
+  :allocation-activation :prf-hosted,
+  :authorization-chain :prf-hosted,
+  :ef-demo-pro-rata-allocation :prf-hosted,
+  :xtdb-overview :prf-hosted,
+  :yield-scenarios-workbench :prf-hosted,
+  :telemetry :prf-hosted,
+  :demo-reorder-chain :prf-hosted,
+  :partial-liquidity-recovery :prf-hosted,
+  :hardening-artifact :standalone,
+  :security-validation-notebook :prf-hosted,
+  :reproduction-comparability :prf-hosted,
+  :research-resolution :prf-hosted,
+  :ef-demo-dispute-refund :prf-hosted,
+  :demo-adversarial-escalation :prf-hosted,
+  :appealed-escrow-walkthrough :prf-hosted,
+  :evaluate-pro-rata-allocation :prf-hosted,
+  :xtdb-temporal-explorer :prf-hosted,
+  :appeal-analysis :prf-hosted,
+  :pro-rata-allocation-result :prf-hosted,
+  :yield-demo :prf-hosted,
+  :portable-canonical-package :package-dependent,
+  :counterfactual-pairs :prf-hosted,
+  :demo-not-admitted :prf-hosted,
+  :demo-multi-epoch-cartel :standalone,
+  :demo-liquidity-shortfall :standalone,
+  :demo-short-circuit :prf-hosted}}

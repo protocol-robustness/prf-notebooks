@@ -5,6 +5,21 @@
  :release/status :not-qualified
  :registry/published? false
  :qualification
- {:standalone-evaluation :not-qualified
+ {:standalone-evaluation :sample-qualified
+  :namespace-import-smoke :passed-with-pinned-prf-host
+  :sample-notebook-execution
+  {:status :passed
+   :notebook-source-revision "bf12641a1830fdbc95195fdf7b69f230fa3c074a"
+   :clean-checkout? true
+   :unrelated-working-directory? true
+   :preexisting-prf-checkout? false
+   :standalone {:notebook :hardening-artifact
+                :record "qualifications/hardening-artifact.edn"}
+   :package-dependent {:notebook :portable-canonical-package
+                       :record "qualifications/portable-canonical-package.edn"}
+   :prf-hosted {:notebook :report
+                :prf-host-revision "0c0134c4b34f121c8b2201657270198425f89f28"
+                :record "qualifications/report.edn"}
+   :complete-registry-evaluation :not-qualified}
   :host-integration-migration :pending
   :rendered-site-publication :not-qualified}}

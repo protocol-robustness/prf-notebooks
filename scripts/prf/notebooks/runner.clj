@@ -1,0 +1,331 @@
+(ns prf.notebooks.runner
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
+            [clojure.set :as set]
+            [clojure.pprint :as pprint]
+            [clojure.string :as str])
+  (:import [java.nio.file Files Path Paths LinkOption]
+           [java.security MessageDigest]))
+
+(defn fail! [message]
+  (binding [*out* *err*] (println message))
+  (System/exit 2))
+
+(def repo-root
+  (-> (Paths/get (System/getenv "PRF_NOTEBOOKS_REPO") (make-array String 0))
+      .toAbsolutePath .normalize))
+(def cache-root
+  (-> (Paths/get (or (System/getenv "PRF_NOTEBOOKS_CACHE")
+                     (str (System/getProperty "user.home") "/.cache/prf-notebooks"))
+                 (make-array String 0))
+      .toAbsolutePath .normalize))
+(def config
+  (edn/read-string (slurp (.toFile (.resolve repo-root "data/notebook-runtime.edn")))))
+(def registry
+  (edn/read-string (slurp (.toFile (.resolve repo-root "data/notebooks.edn")))))
+(def deps-config
+  (edn/read-string (slurp (.toFile (.resolve repo-root "deps.edn")))))
+(def by-id (into {} (map (juxt :id identity) (:notebooks registry))))
+
+(defn git-sha [alias coordinate]
+  (get-in deps-config [:aliases alias :extra-deps coordinate :git/sha]))
+
+(defn validate-config! []
+  (let [registered (set (keys by-id))
+        classified (set (keys (:notebooks config)))
+        expected {:prf-host (select-keys (:prf-host config) [:git/url :git/sha])
+                  :canonical (select-keys (get-in config [:packages :canonical]) [:git/url :git/sha])
+                  :allocation (select-keys (get-in config [:packages :allocation]) [:git/url :git/sha])}
+        actual {:prf-host {:git/url (get-in deps-config [:aliases :prf-host :extra-deps
+                                                          'protocol-robustness/framework :git/url])
+                           :git/sha (git-sha :prf-host 'protocol-robustness/framework)}
+                :canonical {:git/url (get-in deps-config [:aliases :portable-packages :extra-deps
+                                                           'prf/canonical :git/url])
+                            :git/sha (git-sha :portable-packages 'prf/canonical)}
+                :allocation {:git/url (get-in deps-config [:aliases :portable-packages :extra-deps
+                                                            'prf/pro-rata-allocation :git/url])
+                             :git/sha (git-sha :portable-packages 'prf/pro-rata-allocation)}}
+        actual (into {} (map (fn [[k v]] [k (into {} (remove (comp nil? val)) v)]) actual))]
+    (when-not (= registered classified)
+      (fail! (str "Notebook classifications do not match registry. Unclassified: "
+                  (pr-str (set/difference registered classified))
+                  "; unknown: " (pr-str (set/difference classified registered)))))
+    (when-not (= expected actual)
+      (fail! (str "Pinned Git revisions diverge between data/notebook-runtime.edn and deps.edn: "
+                  (pr-str {:runtime expected :deps-edn actual}))))
+    (when (.startsWith cache-root repo-root)
+      (fail! (str "Managed cache must be outside tracked sources: " cache-root)))))
+
+(defn managed-path [key]
+  (.resolve cache-root (str (name key) "/" (get-in config [:packages key :git/sha]))))
+(defn host-path []
+  (.resolve cache-root (str "prf-host/" (get-in config [:prf-host :git/sha]))))
+(defn standalone-ready-path []
+  (.resolve cache-root "ready/standalone"))
+
+(defn run-command! [args dir]
+  (let [p (doto (ProcessBuilder. ^java.util.List (mapv str args))
+            (.directory (.toFile ^Path dir))
+            (.inheritIO))
+        code (.waitFor (.start p))]
+    (when-not (zero? code)
+      (throw (ex-info "Command failed" {:command args :exit code})))
+    code))
+
+(defn command-output [args dir]
+  (let [{:keys [exit out err]} (apply shell/sh (concat args [:dir (str dir)]))]
+    (when-not (zero? exit)
+      (throw (ex-info (str "Command failed: " (str/join " " args))
+                      {:exit exit :stdout out :stderr err})))
+    (str/trim out)))
+
+(defn ensure-checkout! [git-url sha dest]
+  (Files/createDirectories (.getParent ^Path dest)
+                           (make-array java.nio.file.attribute.FileAttribute 0))
+  (if (Files/exists dest (make-array LinkOption 0))
+    (let [actual (command-output ["git" "rev-parse" "HEAD"] dest)
+          remote (command-output ["git" "config" "--get" "remote.origin.url"] dest)
+          changes (command-output ["git" "status" "--porcelain"] dest)]
+      (when-not (= sha actual)
+        (fail! (str "Managed checkout at " dest " is " actual ", expected " sha)))
+      (when-not (= git-url remote)
+        (fail! (str "Managed checkout origin at " dest " is " remote ", expected " git-url)))
+      (when-not (empty? changes)
+        (fail! (str "Managed checkout at " dest " has uncommitted changes; refusing evaluation."))))
+    (do
+      (run-command! ["git" "clone" "--no-checkout" "--filter=blob:none" git-url (str dest)] repo-root)
+      (run-command! ["git" "-C" (str dest) "fetch" "--depth=1" "origin" sha] repo-root)
+      (run-command! ["git" "-C" (str dest) "checkout" "--detach" sha] repo-root)))
+  (let [actual (command-output ["git" "rev-parse" "HEAD"] dest)]
+    (when-not (= sha actual)
+      (fail! (str "Checkout verification failed at " dest ": " actual " != " sha))))
+  dest)
+
+(declare prefetch-dependencies!)
+
+(defn setup! [flags]
+  (validate-config!)
+  (when (or (:prf-host flags) (:all flags))
+    (ensure-checkout! (get-in config [:prf-host :git/url])
+                      (get-in config [:prf-host :git/sha]) (host-path)))
+  (when (or (:packages flags) (:all flags))
+    (doseq [[key package] (:packages config)]
+      (ensure-checkout! (:git/url package) (:git/sha package) (managed-path key))))
+  (prefetch-dependencies! {:prf-host (or (:prf-host flags) (:all flags))
+                           :packages (or (:packages flags) (:all flags))})
+  (when (or (:standalone flags) (:all flags))
+    (Files/createDirectories (.resolve cache-root "ready")
+                             (make-array java.nio.file.attribute.FileAttribute 0))
+    (spit (.toFile (standalone-ready-path)) "standalone dependency closure resolved\n"))
+  (println "Managed source setup complete."))
+
+(defn print-list! []
+  (validate-config!)
+  (doseq [[id entry] (sort-by (comp name key) by-id)]
+    (println (format "%-42s %-18s %s" (name id)
+                     (name (get-in config [:notebooks id])) (:path entry)))))
+
+(defn parse-flags [args]
+  (loop [remaining args out {}]
+    (if-let [arg (first remaining)]
+      (case arg
+        "--with-prf-host" (recur (rest remaining) (assoc out :prf-host true))
+        "--with-packages" (recur (rest remaining) (assoc out :packages true))
+        "--output" (if-let [value (second remaining)]
+                     (recur (nnext remaining) (assoc out :output value))
+                     (fail! "--output requires a directory"))
+        (fail! (str "Unknown option: " arg)))
+      out)))
+
+(defn sha256-file [^Path path]
+  (let [digest (MessageDigest/getInstance "SHA-256")
+        bytes (Files/readAllBytes path)]
+    (apply str (map #(format "%02x" (bit-and 0xff %)) (.digest digest bytes)))))
+
+(defn normalized-classpath-entry [entry]
+  (let [path (Paths/get entry (make-array String 0))
+        absolute (if (.isAbsolute path) path (.resolve repo-root path))
+        absolute (.normalize absolute)
+        m2-root (Paths/get (str (System/getProperty "user.home") "/.m2/repository")
+                           (make-array String 0))]
+    (cond
+      (.startsWith absolute cache-root) (str "managed:" (.relativize cache-root absolute))
+      (.startsWith absolute repo-root) (str "repo:" (.relativize repo-root absolute))
+      (.startsWith absolute m2-root) (str "maven:" (.relativize m2-root absolute))
+      :else entry)))
+
+(defn git-blob [^Path root file]
+  (command-output ["git" "rev-parse" (str "HEAD:" file)] root))
+
+(defn verified-fixtures! []
+  (into {}
+        (map (fn [[path expected]]
+               (let [actual (git-blob (host-path) path)]
+                 (when-not (= expected actual)
+                   (fail! (str "PRF fixture identity mismatch for " path
+                               ": expected " expected ", got " actual)))
+                 [path actual])))
+        (get-in config [:prf-host :fixture-blobs])))
+
+(defn source-revision [^Path root]
+  (try
+    (command-output ["git" "rev-parse" "HEAD"] root)
+    (catch Exception _
+      (command-output ["jj" "-R" (str root) "log" "--no-graph" "-r" "@-" "-T" "commit_id"] root))))
+
+(declare local-deps-sdeps)
+
+(defn prefetch-dependencies! [flags]
+  (run-command! ["clojure" "-Sdeps" (local-deps-sdeps flags) "-P"] repo-root))
+
+(defn local-deps-sdeps [flags]
+  (let [deps (cond-> {}
+               (:prf-host flags)
+               (assoc 'protocol-robustness/framework {:local/root (str (host-path))})
+               (:packages flags)
+               (assoc 'prf/canonical {:local/root (str (.resolve (managed-path :canonical) "clj"))}
+                      'prf/pro-rata-allocation {:local/root (str (.resolve (managed-path :allocation) "clj"))}))
+        paths (cond-> [] (:prf-host flags) (conj (str (.resolve (host-path) "protocols_src"))))]
+    (pr-str {:deps deps :paths paths})))
+
+(defn classpath-duplicates! [flags]
+  (let [command ["clojure" "-Sdeps" (local-deps-sdeps flags) "-Spath"]
+        cp (command-output command repo-root)
+        path-separator (re-pattern (java.util.regex.Pattern/quote java.io.File/pathSeparator))
+        paths (str/split cp path-separator)
+        canonical-sources
+        (for [path paths
+              :let [root (Paths/get path (make-array String 0))]
+              :when (Files/isDirectory root (make-array LinkOption 0))
+              file (file-seq (.toFile root))
+              :when (and (.isFile file)
+                         (re-matches #"prf/canonical/[^/]+\.clj"
+                                     (str (.relativize root (.toPath file)))))]
+          (str (.toAbsolutePath (.toPath file))))
+        duplicates (->> canonical-sources frequencies (filter (fn [[_ n]] (> n 1))))]
+    (when (seq duplicates)
+      (fail! (str "Duplicate prf.canonical source namespaces on classpath: " (pr-str duplicates))))
+    cp))
+
+(defn build-command [id flags output]
+  (let [entry (get by-id id)
+        source (.toAbsolutePath (.resolve repo-root (:path entry)))
+        code (str "(require '[nextjournal.clerk :as clerk]) "
+                  "(clerk/build! {:paths [\"" source "\"] :out-path \"" output "\"}) "
+                  "(shutdown-agents) (System/exit 0)")
+        main "-M"]
+    ["clojure" "-Sdeps" (local-deps-sdeps flags)
+     (str "-J-Duser.dir=" (:resource-root flags)) main "-e" code]))
+
+(defn verify-output! [id out-root]
+  (let [files (->> (file-seq (.toFile ^Path out-root))
+                   (filter #(and (.isFile %)
+                                 (or (.endsWith (.getName %) ".html")
+                                     (.endsWith (.getName %) ".edn")))))
+        expected-markers (case id
+                           :hardening-artifact ["HARDENING EVIDENCE"]
+                           :portable-canonical-package ["Portable canonical package example"]
+                           :report ["Evidence Control Panel" "s04-dispute-timeout-autocancel"]
+                           :canonical-framing ["Consecutive Concatenation, Made Visible"]
+                           [])
+        expected-root (get-in config [:qualification-roots id])
+        html-files (filter #(.endsWith (.getName %) ".html") files)
+        edn-files (filter #(.endsWith (.getName %) ".edn") files)
+        content (str/join "\n" (map slurp files))]
+    (when (or (empty? html-files) (empty? edn-files))
+      (fail! (str "Clerk build produced no HTML files under " out-root)))
+    (doseq [expected expected-markers]
+      (when-not (str/includes? content expected)
+        (fail! (str "Built notebook output did not contain expected marker: " expected))))
+    (when (and expected-root (not (str/includes? content expected-root)))
+      (fail! (str "Built canonical output root differs from pinned expected value: " expected-root)))
+    {:html-files (mapv #(.getName %) html-files)
+     :edn-output-files (mapv #(.getName %) edn-files)
+     :expected-markers expected-markers
+     :markers-found? (every? #(str/includes? content %) expected-markers)
+     :canonical/example-root expected-root
+     :sha256 (into {} (map (fn [f] [(.getName f) (sha256-file (.toPath f))]) files))}))
+
+(defn run-notebook! [id flags]
+  (validate-config!)
+  (let [entry (or (get by-id id) (fail! (str "Unknown notebook id: " id)))
+        category (get-in config [:notebooks id])]
+    (when (= category :prf-hosted)
+      (when-not (:prf-host flags)
+        (fail! "This notebook is PRF-hosted; opt in with --with-prf-host."))
+      (ensure-checkout! (get-in config [:prf-host :git/url])
+                        (get-in config [:prf-host :git/sha]) (host-path)))
+    (when (= category :package-dependent)
+      (when-not (:packages flags)
+        (fail! "This notebook needs extracted packages; opt in with --with-packages."))
+      (doseq [[key package] (:packages config)]
+        (ensure-checkout! (:git/url package) (:git/sha package) (managed-path key))))
+    (when (and (not= category :prf-hosted) (:prf-host flags))
+      (fail! "--with-prf-host is only valid for PRF-hosted notebooks."))
+    (when (and (not= category :package-dependent) (:packages flags))
+      (fail! "--with-packages is only valid for package-dependent notebooks."))
+    (let [resource-root (if (= category :prf-hosted) (host-path) repo-root)
+          output (or (:output flags)
+                     (str (.resolve repo-root (str ".cache/notebooks/" (name id)))))
+          out-root (-> (Paths/get output (make-array String 0)) .toAbsolutePath .normalize)
+          flags (assoc flags :resource-root resource-root)
+          _ (if (or (:prf-host flags) (:packages flags))
+              (prefetch-dependencies! flags)
+              (when-not (Files/exists (standalone-ready-path) (make-array LinkOption 0))
+                (fail! "Run setup --standalone before notebook evaluation; setup resolves dependencies explicitly.")))
+          classpath (classpath-duplicates! flags)
+          command (build-command id flags out-root)]
+      (run-command! command repo-root)
+      (let [result (verify-output! id out-root)
+            record {:notebook/id id
+                    :notebook/class category
+                    :notebook/path (:path entry)
+                    :source/revision (source-revision repo-root)
+                    :prf-host/revision (when (= category :prf-hosted)
+                                         (command-output ["git" "rev-parse" "HEAD"] (host-path)))
+                    :resource/root (str resource-root)
+                    :resource/root-source-revision (when (= category :prf-hosted)
+                                                     (command-output ["git" "rev-parse" "HEAD"]
+                                                                     (host-path)))
+                    :fixture/identities (when (= category :prf-hosted)
+                                          (verified-fixtures!))
+                    :evaluation/status :passed
+                    :evaluation/output result
+                    :dependency/source-pins
+                    (cond-> {}
+                      (:prf-host flags)
+                      (assoc :prf-host (get-in config [:prf-host :git/sha]))
+                      (:packages flags)
+                      (assoc :canonical (get-in config [:packages :canonical :git/sha])
+                             :allocation (get-in config [:packages :allocation :git/sha])))
+                    :namespace-check (when (:packages flags)
+                                       {:prf.canonical :unique-on-classpath})
+                    :dependency/classpath
+                    (mapv normalized-classpath-entry
+                          (str/split classpath
+                                     (re-pattern (java.util.regex.Pattern/quote java.io.File/pathSeparator))))}]
+        (Files/createDirectories (.resolve repo-root "qualifications")
+                                 (make-array java.nio.file.attribute.FileAttribute 0))
+        (spit (.toFile (.resolve repo-root (str "qualifications/" (name id) ".edn")))
+              (with-out-str (pprint/pprint record)))
+        (println (str "Notebook evaluation passed: " (name id)
+                      "; record: qualifications/" (name id) ".edn"))))))
+
+(defn -main [& args]
+  (validate-config!)
+  (let [[command & tail] args]
+    (try
+      (case command
+        "list" (print-list!)
+        "setup" (let [flags (set tail)]
+                (when (empty? flags) (fail! "Use setup --standalone, --prf-host, --packages, or --all."))
+                (setup! {:standalone (contains? flags "--standalone")
+                         :prf-host (contains? flags "--prf-host")
+                           :packages (contains? flags "--packages")
+                           :all (contains? flags "--all")}))
+        "run" (let [[id & options] tail]
+                (when-not id (fail! "Use run <notebook-id> [--with-prf-host] [--with-packages]."))
+                (run-notebook! (keyword id) (parse-flags options)))
+      (fail! "Usage: prf-notebooks list | setup --standalone|--prf-host|--packages|--all | run <id> [opt-ins]"))
+      (finally (shutdown-agents)))))

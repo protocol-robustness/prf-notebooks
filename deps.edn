@@ -1,1 +1,33 @@
-{:paths ["." "src"]}
+{:paths ["." "src"]
+ :deps {org.clojure/clojure {:mvn/version "1.12.0"}
+        io.github.nextjournal/clerk {:mvn/version "0.18.1158"}
+        org.clojure/data.json {:mvn/version "2.4.0"}
+        metosin/malli {:mvn/version "0.17.0"}
+        hiccup/hiccup {:mvn/version "2.0.0-RC3"}}
+ :aliases
+ {:prf-host
+  {:extra-deps
+   {protocol-robustness/framework
+    {:git/url "https://github.com/protocol-robustness/protocol-robustness-framework.git"
+     :git/sha "0c0134c4b34f121c8b2201657270198425f89f28"}}}
+
+  ;; Runtime code uses local roots from the managed cache; this Git coordinate
+  ;; is the revision contract validated by scripts/notebooks.clj.
+  :portable-packages
+  {:extra-deps
+   {prf/canonical
+    {:git/url "https://github.com/protocol-robustness/prf-canonical.git"
+     :git/sha "5e2b520feca812b049ba397b7b3681963c66a48c"
+     :deps/root "clj"}
+    prf/pro-rata-allocation
+    {:git/url "https://github.com/protocol-robustness/prf-pro-rata-allocation.git"
+     :git/sha "0b7b2a8badbaa2c345e8b9626aa68907510fc52f"
+     :deps/root "clj"}}}
+
+  :clerk
+  {:exec-fn nextjournal.clerk/serve!
+   :exec-args {:browse true :watch-paths ["src" "notebooks"]}}
+
+  :build-clerk
+  {:exec-fn nextjournal.clerk/build!
+   :exec-args {:paths ["notebooks/report.clj"]}}}}
