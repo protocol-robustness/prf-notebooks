@@ -19,12 +19,22 @@ it does not copy or redefine their economic semantics or data ownership.
 
 ## Runtime
 
-Use this repository as a pinned source dependency of the PRF integration
-workspace. Evaluate notebooks with the PRF project classpath and from the PRF
-checkout root so relative paths such as `scenarios/`, `data/`, `etc/`, and
-`results/` resolve to their owning datasets. This source extraction does not
-make those datasets portable or move simulation implementations into this
-repository.
+The repository declares its direct Clojure, Clerk, JSON, schema, and hiccup
+dependencies in `deps.edn`. The notebook code also imports many
+`resolver-sim.*` implementation namespaces owned by PRF. For local import
+checks, resolve the classpath from this repository with
+`clojure -P -M:prf-host:clerk`. The `:prf-host` alias pins PRF source revision
+`0c0134c4b34f121c8b2201657270198425f89f28`; it is a development bridge, not a
+published runtime package dependency. Full evaluation of notebooks that open
+relative paths such as `scenarios/`, `data/`, `etc/`, and `results/` requires
+the PRF checkout root as the working directory. That host integration is still
+pending, so the standalone extraction does not yet provide a one-command way
+to combine its dependency file with the host working directory.
+
+This gives the extracted repository a reproducible source classpath, while
+notebook evaluation still depends on the pinned host's implementation namespaces
+and PRF-owned datasets. It does not make those datasets portable or move their
+semantics here.
 
 The source snapshot is recorded in `PROVENANCE.md`. No notebook package or
 rendered site has been published from this repository.

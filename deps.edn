@@ -1,1 +1,20 @@
-{:paths ["." "src"]}
+{:paths ["." "src"]
+ :deps {org.clojure/clojure {:mvn/version "1.12.0"}
+        io.github.nextjournal/clerk {:mvn/version "0.18.1158"}
+        org.clojure/data.json {:mvn/version "2.4.0"}
+        metosin/malli {:mvn/version "0.17.0"}
+        hiccup/hiccup {:mvn/version "2.0.0-RC3"}}
+ :aliases
+ {:prf-host
+  {:extra-deps
+   {protocol-robustness/framework
+    {:git/url "https://github.com/protocol-robustness/protocol-robustness-framework.git"
+     :git/sha "0c0134c4b34f121c8b2201657270198425f89f28"}}}
+
+  :clerk
+  {:exec-fn nextjournal.clerk/serve!
+   :exec-args {:browse true :watch-paths ["src" "notebooks"]}}
+
+  :build-clerk
+  {:exec-fn nextjournal.clerk/build!
+   :exec-args {:paths ["notebooks/report.clj"]}}}}

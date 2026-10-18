@@ -1,4 +1,5 @@
 /.clerk/
 /.cache/
+/.cpcache/
 /public/build/
 /site/out/
