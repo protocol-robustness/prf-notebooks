@@ -7,11 +7,11 @@
   :canonical/example-root nil,
   :sha256
   {"index.html"
-   "6017afefe6be11806f2794acbc59262abda7c0ea4cdd05773136ae790dc08f1f",
+   "f5e85776a9b0b7166fce0b975decc9a2df7025962e9d107190138e1611798010",
    "index.edn"
-   "e29de2bcaa9b04416ea5eb8f92efb4b24adede715de2e652fc29152f78b54771"}},
+   "f5c21d00bbe115942f3ada07a6a4a5e04a0bf8f48a9b673486e58accb4515d14"}},
  :resource/root
- "/tmp/prf-notebooks-final-cache/prf-host/0c0134c4b34f121c8b2201657270198425f89f28",
+ "/tmp/prf-notebooks-release-cache/prf-host/0c0134c4b34f121c8b2201657270198425f89f28",
  :fixture/identities
  {"data/notebooks.edn" "90f243007ccc803a4e4cd965e7d6dd3ed80b16c9",
   "data/fixtures/traces" "e550acdeb979f5d3ff6005a98919f9de5469b6cd",
@@ -136,7 +136,7 @@
   "maven:org/clojure/tools.analyzer/1.2.0/tools.analyzer-1.2.0.jar"
   "maven:org/clojure/core.cache/1.1.234/core.cache-1.1.234.jar"
   "maven:org/clojure/data.priority-map/1.2.0/data.priority-map-1.2.0.jar"],
- :source/revision "bf12641a1830fdbc95195fdf7b69f230fa3c074a",
+ :source/revision "385dacf0d3a1534ca86e5894381f095941e88f78",
  :resource/root-source-revision
  "0c0134c4b34f121c8b2201657270198425f89f28",
  :namespace-check nil,
