@@ -8,6 +8,11 @@ simulation namespaces and read scenario, fixture, conformance, and generated
 result files from that checkout. The repository preserves those references;
 it does not copy or redefine their economic semantics or data ownership.
 
+Notebook results are exploratory evidence for each notebook's declared,
+pinned workload. A successful render or evaluation does not by itself establish
+that PRF or an application is complete for general use, production-ready, or
+independently qualified; consult the notebook's recorded validation and scope.
+
 ## Repository contents
 
 - `notebooks/`: executable Clerk notebook sources and their local configuration.
