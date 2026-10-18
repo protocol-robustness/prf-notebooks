@@ -1,0 +1,10 @@
+{:artifact/id "prf-notebooks"
+ :source/version "0.1.0"
+ :source/upstream-revision "0c0134c4b34f121c8b2201657270198425f89f28"
+ :source/status :extracted-source-candidate
+ :release/status :not-qualified
+ :registry/published? false
+ :qualification
+ {:standalone-evaluation :not-qualified
+  :host-integration-migration :pending
+  :rendered-site-publication :not-qualified}}
