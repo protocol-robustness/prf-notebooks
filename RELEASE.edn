@@ -9,7 +9,7 @@
   :namespace-import-smoke :passed-with-pinned-prf-host
   :sample-notebook-execution
   {:status :passed
-   :notebook-source-revision "2f0c48ca66be54bc61b8287c366e06ac019a31dd"
+   :notebook-source-revision "905a5ab0ec3c11df76f733452e4531a15a475f2b"
    :clean-checkout? true
    :unrelated-working-directory? true
    :preexisting-prf-checkout? false

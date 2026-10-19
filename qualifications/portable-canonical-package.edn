@@ -7,13 +7,15 @@
   "0937f59db7f2eb1089af353ac0b66fda237aaecbfc60eb6cd39caed8d296629b",
   :sha256
   {"index.html"
-   "dae64f8ba606bfca71b68cf2932c23eb7f0eff85eaa5960cc732bbe7ccbc314b",
+   "b0494144d1da50c6df311d64cac0ef8df5e44e75a927f8938d400b9f4a25fb47",
    "index.edn"
-   "c4824fc401bc4ba2d09fc24a9bdc9186d82b0d515e228c90a10f0c858ee6c1c8"}},
+   "a4fb18afeece3f8334977d463ee77eec226926543a0929ef6b79cf0cc2cc7a3b"}},
  :resource/root "repo:",
  :fixture/identities nil,
  :dependency/classpath
- ["maven:hiccup/hiccup/2.0.0-RC3/hiccup-2.0.0-RC3.jar"
+ ["repo:"
+  "repo:src"
+  "maven:hiccup/hiccup/2.0.0-RC3/hiccup-2.0.0-RC3.jar"
   "maven:io/github/nextjournal/clerk/0.18.1158/clerk-0.18.1158.jar"
   "maven:metosin/malli/0.17.0/malli-0.17.0.jar"
   "maven:org/clojure/clojure/1.12.0/clojure-1.12.0.jar"
@@ -60,7 +62,7 @@
   "maven:org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar"
   "maven:com/taoensso/truss/1.11.0/truss-1.11.0.jar"
   "maven:org/nibor/autolink/autolink/0.11.0/autolink-0.11.0.jar"],
- :source/revision "2f0c48ca66be54bc61b8287c366e06ac019a31dd",
+ :source/revision "905a5ab0ec3c11df76f733452e4531a15a475f2b",
  :resource/root-source-revision nil,
  :namespace-check {:prf.canonical :unique-on-classpath},
  :notebook/class :package-dependent,
