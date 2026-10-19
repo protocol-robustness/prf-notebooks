@@ -311,7 +311,7 @@
       (fail! (str "Checkout verification failed at " dest ": " actual " != " sha))))
   dest)
 
-(declare prefetch-dependencies!)
+(declare prefetch-dependencies! runtime-working-directory)
 
 (defn setup! [flags]
   (validate-config!)
@@ -390,20 +390,30 @@
 (declare local-deps-sdeps)
 
 (defn prefetch-dependencies! [flags]
-  (run-command! ["clojure" "-Sdeps" (local-deps-sdeps flags) "-P"] repo-root))
+  (run-command! ["clojure" "-Sdeps" (local-deps-sdeps flags) "-P"]
+                (runtime-working-directory flags)))
+
+(defn runtime-working-directory [flags]
+  (if (:prf-host flags) (host-path) repo-root))
 
 (defn local-deps-sdeps [flags]
   (let [deps (cond-> {}
                (:prf-host flags)
-               (assoc 'protocol-robustness/framework {:local/root (str (host-deps-path))})
+               (assoc 'protocol-robustness/framework {:local/root (str (host-deps-path))}
+                      'prf/notebooks {:local/root (str repo-root)})
                (:packages flags)
                (assoc 'prf/canonical {:local/root (str (.resolve (managed-path :canonical) "clj"))}
                       'prf/pro-rata-allocation {:local/root (str (.resolve (managed-path :allocation) "clj"))}))]
+    ;; PRF-hosted evaluation runs with the host checkout as the real process
+    ;; working directory so java.io.File and java.nio.file resolve the same
+    ;; relative resources. Add the notebook checkout as a local dependency so
+    ;; its source, local resources, and declared libraries remain available.
     (pr-str {:deps deps})))
 
 (defn classpath-duplicates! [flags]
-  (let [command ["clojure" "-Sdeps" (local-deps-sdeps flags) "-Spath"]
-        cp (command-output command repo-root)
+  (let [working-directory (runtime-working-directory flags)
+        command ["clojure" "-Sdeps" (local-deps-sdeps flags) "-Spath"]
+        cp (command-output command working-directory)
         path-separator (re-pattern (java.util.regex.Pattern/quote java.io.File/pathSeparator))
         paths (str/split cp path-separator)
         inventory (namespace-inventory paths)
@@ -486,7 +496,7 @@
                 (fail! "Run setup --standalone before notebook evaluation; setup resolves dependencies explicitly.")))
           classpath (classpath-duplicates! flags)
           command (build-command id flags out-root)]
-      (run-command! command repo-root)
+      (run-command! command (runtime-working-directory flags))
       (let [result (verify-output! id out-root)
             record {:notebook/id id
                     :notebook/class category
