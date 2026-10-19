@@ -13,7 +13,8 @@
   :nextjournal.clerk/dark-mode true
   :nextjournal.clerk/visibility {:code :hidden :result :show}}
 (ns notebooks.not-admitted
-  (:require [nextjournal.clerk :as clerk]
+  (:require [clojure.string :as str]
+            [nextjournal.clerk :as clerk]
 
             [resolver-sim.assurance.admission-fixed-point :as afp]
             [resolver-sim.assurance.custody :as custody]
@@ -401,13 +402,13 @@
   :rows [["frozen, valid three-member round"
           (if (:pre-certificate-valid? incomplete-certificate-check) "present" "NOT ADMITTED")]
          ["one report per member"
-          (if (some #(clojure.string/includes? % "reports must contain")
+          (if (some #(str/includes? % "reports must contain")
                     (:errors incomplete-certificate-check)) "missing — rejected" "present")]
          ["one position per member"
-          (if (some #(clojure.string/includes? % "positions must contain")
+          (if (some #(str/includes? % "positions must contain")
                     (:errors incomplete-certificate-check)) "missing — rejected" "present")]
          ["canonical index bound to the round"
-          (if (some #(clojure.string/includes? % "canonical-indices")
+          (if (some #(str/includes? % "canonical-indices")
                     (:errors incomplete-certificate-check)) "missing or invalid — rejected" "present")]]})
 
 ;; The exact errors are exposed for reviewer inspection. The builder refuses to

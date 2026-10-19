@@ -9,7 +9,8 @@
 ^{:nextjournal.clerk/visibility {:code :fold}
   :nextjournal.clerk/dark-mode true}
 (ns notebooks.index
-  (:require [nextjournal.clerk :as clerk]
+  (:require [clojure.string :as str]
+            [nextjournal.clerk :as clerk]
             [resolver-sim.notebook-support.nav :as nav]
             [resolver-sim.notebook-support.common :as common]))
 
@@ -76,7 +77,7 @@
         "📌 Recently Added"]
        [:div {:style {:display "grid" :gridTemplateColumns "repeat(auto-fill, minmax(280px, 1fr))" :gap "12px"}}
         (for [e entries]
-          (let [href (clojure.string/replace (:path e) #"\.clj$" "")]
+          (let [href (str/replace (:path e) #"\.clj$" "")]
             [:div {:key (name (:id e))
                    :style {:background "#0f172a" :border "1px solid #134e4a"
                            :borderRadius "6px" :padding "12px 14px"}}

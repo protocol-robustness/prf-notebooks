@@ -9,20 +9,25 @@
   :nextjournal.clerk/visibility {:code :fold :result :show}
   :nextjournal.clerk/no-cache true}
 (ns notebooks.not-governance
-  (:require [nextjournal.clerk :as clerk]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [nextjournal.clerk :as clerk]
             [resolver-sim.protocols.sew :as sew]
             [resolver-sim.sim.batch :as batch]
             [resolver-sim.stochastic.rng :as rng]
             [resolver-sim.protocols.sew.economics :as sew-econ]
             [resolver-sim.notebook-support.views :as views]
-            [resolver-sim.notebook-support.checks :as checks]
-            [resolver-sim.io.params :as io-params]))
+            [resolver-sim.notebook-support.checks :as checks]))
 
-;; Shared constants loaded from notebook-local config.
+;; Shared constants loaded from a package-owned classpath resource.
 ;; Edit notebooks/appeal_config.edn to change parameter bands.
+(defn- load-appeal-config []
+  (if-let [resource (io/resource "notebooks/appeal_config.edn")]
+    (edn/read-string (slurp resource))
+    (throw (ex-info "Notebook resource is missing: notebooks/appeal_config.edn" {}))))
+
 ^{:nextjournal.clerk/visibility {:code :hide :result :hide}}
-(defonce const
-  (io-params/load-edn "notebooks/appeal_config.edn"))
+(defonce const (load-appeal-config))
 
 ^{:nextjournal.clerk/visibility {:code :hide :result :hide}}
 (defn- run-batch

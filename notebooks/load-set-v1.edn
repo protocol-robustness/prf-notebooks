@@ -32,6 +32,7 @@
   "notebooks/not_governance.clj"
   "notebooks/notebook_comparison.clj"
   "notebooks/partial_liquidity_recovery_deferred_claim.clj"
+  "notebooks/portable_canonical_package.clj"
   "notebooks/pro_rata_allocation_result.clj"
   "notebooks/protocol_provenance.clj"
   "notebooks/report.clj"

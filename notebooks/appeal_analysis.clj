@@ -23,15 +23,16 @@
   :nextjournal.clerk/dark-mode true
   :nextjournal.clerk/visibility {:code :fold :result :show}}
 (ns notebooks.appeal-analysis
-  (:require [clojure.string :as str]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.string :as str]
             [nextjournal.clerk :as clerk]
             [resolver-sim.notebook-support.ui :as ui]
             [resolver-sim.notebook-support.theme :refer [notebook-theme]]
             [resolver-sim.protocols.sew.economics :as sew-econ]
             [resolver-sim.protocols.sew.research-models.escalation-economics :as ee]
             [resolver-sim.stochastic.detection :as detect]
-            [resolver-sim.stochastic.decision-quality :as dq]
-            [resolver-sim.io.params :as io-params]))
+            [resolver-sim.stochastic.decision-quality :as dq]))
 
 (def mermaid-viewer
   {:transform-fn clerk/mark-presented
@@ -66,8 +67,12 @@
 ;; ===========================================================================
 
 ^{:nextjournal.clerk/visibility {:code :hide :result :hide}}
-(def cfg
-  (delay (io-params/load-edn "notebooks/appeal_config.edn")))
+(defn- load-appeal-config []
+  (if-let [resource (io/resource "notebooks/appeal_config.edn")]
+    (edn/read-string (slurp resource))
+    (throw (ex-info "Notebook resource is missing: notebooks/appeal_config.edn" {}))))
+
+(def cfg (delay (load-appeal-config)))
 
 ^{:nextjournal.clerk/visibility {:code :hide :result :hide}}
 (defn- styled-table

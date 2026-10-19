@@ -396,8 +396,12 @@
 ;; reproduction instructions and the boundary of the modelled result.
 
 (defn- file-sha256 [path]
-  (let [digest (MessageDigest/getInstance "SHA-256")]
-    (with-open [in (io/input-stream path)]
+  (let [digest (MessageDigest/getInstance "SHA-256")
+        source (or (io/resource path)
+                    (let [file (io/file path)] (when (.isFile file) file)))]
+    (when-not source
+      (throw (ex-info "Forensic source file is unavailable" {:path path})))
+    (with-open [in (io/input-stream source)]
       (let [buffer (byte-array 8192)]
         (loop []
           (let [n (.read in buffer)]
