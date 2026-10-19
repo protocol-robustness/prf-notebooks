@@ -6,10 +6,10 @@
   :canonical/example-root nil,
   :sha256
   {"index.html"
-   "d77fce005ae95497d67fda018d138c6faa7959e260513fd7c410fc97bff9bf16",
+   "20103a0686aee19fb5f2814f8c152b292cc8ca5339e85a6cde5b33ea403425d1",
    "index.edn"
-   "adcb524d39aff2b009af6e5e245f2902e3de31d775c81be6cbbfabcc8c1d2f88"}},
- :resource/root "/tmp/prf-notebooks-release-source",
+   "5d63fea1c1d708d7188134ad066c7ae0e8ec2583f9c25c48b7ac5d85a27c9254"}},
+ :resource/root "repo:",
  :fixture/identities nil,
  :dependency/classpath
  ["maven:hiccup/hiccup/2.0.0-RC3/hiccup-2.0.0-RC3.jar"
@@ -57,7 +57,7 @@
   "maven:org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar"
   "maven:com/taoensso/truss/1.11.0/truss-1.11.0.jar"
   "maven:org/nibor/autolink/autolink/0.11.0/autolink-0.11.0.jar"],
- :source/revision "385dacf0d3a1534ca86e5894381f095941e88f78",
+ :source/revision "2f0c48ca66be54bc61b8287c366e06ac019a31dd",
  :resource/root-source-revision nil,
  :namespace-check nil,
  :notebook/class :standalone,

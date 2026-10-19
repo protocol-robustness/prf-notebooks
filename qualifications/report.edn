@@ -7,11 +7,11 @@
   :canonical/example-root nil,
   :sha256
   {"index.html"
-   "f5e85776a9b0b7166fce0b975decc9a2df7025962e9d107190138e1611798010",
+   "a0fc2e53dd8a0729bb4d9f53c2a35015ea9a2295512ab756f448bd2e9fedeb39",
    "index.edn"
-   "f5c21d00bbe115942f3ada07a6a4a5e04a0bf8f48a9b673486e58accb4515d14"}},
+   "eb548b421e6a08dcfce80bbf4d7d2e8902ca60b3728515dfe84a83b737bae6c5"}},
  :resource/root
- "/tmp/prf-notebooks-release-cache/prf-host/0c0134c4b34f121c8b2201657270198425f89f28",
+ "managed:prf-host/0c0134c4b34f121c8b2201657270198425f89f28",
  :fixture/identities
  {"data/notebooks.edn" "90f243007ccc803a4e4cd965e7d6dd3ed80b16c9",
   "data/fixtures/traces" "e550acdeb979f5d3ff6005a98919f9de5469b6cd",
@@ -63,8 +63,8 @@
   "maven:org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar"
   "maven:org/slf4j/slf4j-simple/1.7.36/slf4j-simple-1.7.36.jar"
   "managed:prf-host/0c0134c4b34f121c8b2201657270198425f89f28/packages/accounting-reductions/clj/src"
-  "/home/user/.gitlibs/libs/prf/canonical/5e2b520feca812b049ba397b7b3681963c66a48c/clj/src"
-  "/home/user/.gitlibs/libs/prf/pro-rata-allocation/48e0b362748cd39d09994a8aa1496c668199aa74/clj/src"
+  "gitlibs:prf/canonical/5e2b520feca812b049ba397b7b3681963c66a48c/clj/src"
+  "gitlibs:prf/pro-rata-allocation/48e0b362748cd39d09994a8aa1496c668199aa74/clj/src"
   "maven:scicloj/tablecloth/7.029.2/tablecloth-7.029.2.jar"
   "maven:org/clojure/tools.reader/1.5.2/tools.reader-1.5.2.jar"
   "maven:io/methvin/directory-watcher/0.17.3/directory-watcher-0.17.3.jar"
@@ -136,7 +136,7 @@
   "maven:org/clojure/tools.analyzer/1.2.0/tools.analyzer-1.2.0.jar"
   "maven:org/clojure/core.cache/1.1.234/core.cache-1.1.234.jar"
   "maven:org/clojure/data.priority-map/1.2.0/data.priority-map-1.2.0.jar"],
- :source/revision "385dacf0d3a1534ca86e5894381f095941e88f78",
+ :source/revision "2f0c48ca66be54bc61b8287c366e06ac019a31dd",
  :resource/root-source-revision
  "0c0134c4b34f121c8b2201657270198425f89f28",
  :namespace-check nil,
