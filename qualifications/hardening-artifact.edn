@@ -6,9 +6,9 @@
   :canonical/example-root nil,
   :sha256
   {"index.html"
-   "f5c2808d6a53353d22cbbd9eb50d3adc4bd0169b1f228641d9d91252e691a1ad",
+   "0b79da771d101fa4a22179b1e56262bbf6cab78194ee52265230113f1d12c04e",
    "index.edn"
-   "accd8b9b38afd5aab31fc47e55d0ef3ff7d1a7f1a671513f19d171345395fcc2"}},
+   "cd5596429083be046dd366f741f7dc14108374272d8e5cd893cd2238566cf521"}},
  :resource/root "repo:",
  :fixture/identities nil,
  :dependency/classpath
@@ -59,7 +59,7 @@
   "maven:org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar"
   "maven:com/taoensso/truss/1.11.0/truss-1.11.0.jar"
   "maven:org/nibor/autolink/autolink/0.11.0/autolink-0.11.0.jar"],
- :source/revision "2c3c2a47389987b1f43d89c491225a05a98866d4",
+ :source/revision "db6291c35bbffcd6a10fd23b98537fb074dbcad8",
  :resource/root-source-revision nil,
  :namespace-check nil,
  :notebook/class :standalone,

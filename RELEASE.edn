@@ -9,7 +9,7 @@
   :namespace-import-smoke :passed-with-pinned-prf-host
   :sample-notebook-execution
   {:status :passed
-   :notebook-source-revision "2c3c2a47389987b1f43d89c491225a05a98866d4"
+   :notebook-source-revision "db6291c35bbffcd6a10fd23b98537fb074dbcad8"
    :clean-checkout? true
    :unrelated-working-directory? true
    :preexisting-prf-checkout? false
@@ -20,6 +20,18 @@
    :prf-hosted {:notebook :report
                 :prf-host-revision "0c0134c4b34f121c8b2201657270198425f89f28"
                 :record "qualifications/report.edn"}
+   :additional-evaluations
+   {:appeal-analysis "qualifications/appeal-analysis.edn"
+    :pro-rata-allocation-result "qualifications/pro-rata-allocation-result.edn"
+    :ef-demo-pro-rata-allocation "qualifications/ef-demo-pro-rata-allocation.edn"
+    :yield-shortfall-partial-withdrawal-fills
+    "qualifications/yield-shortfall-partial-withdrawal-fills.edn"}
    :complete-registry-evaluation :not-qualified}
+  :host-evaluation-blockers
+  [{:notebook :not-governance
+    :host-revision "0c0134c4b34f121c8b2201657270198425f89f28"
+    :status :blocked-by-host-source
+    :cause "PRF host source protocols_src/resolver_sim/protocols/sew/adjudication_instance.clj contains invalid Clojure keyword :sew/adjudication-instance/root (line 10)."
+    :claim :complete-registry-evaluation-not-qualified}]
   :host-integration-migration :pending
   :rendered-site-publication :not-qualified}}
