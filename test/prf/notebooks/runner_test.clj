@@ -8,11 +8,14 @@
 (defn- temp-dir []
   (Files/createTempDirectory "prf-notebooks-test-" (make-array FileAttribute 0)))
 
-(defn- write-namespace! [^Path root relative-path]
+(defn- write-source! [^Path root relative-path source]
   (let [path (.resolve root relative-path)]
     (Files/createDirectories (.getParent path) (make-array FileAttribute 0))
-    (spit (.toFile path) "(ns prf.canonical.fixture)\n")
+    (spit (.toFile path) source)
     path))
+
+(defn- write-namespace! [^Path root relative-path]
+  (write-source! root relative-path "(ns prf.canonical.fixture)\n"))
 
 (defn- write-namespace-jar! [^Path path relative-path]
   (Files/createDirectories (.getParent path) (make-array FileAttribute 0))
@@ -38,13 +41,29 @@
         second-root (temp-dir)]
     (write-namespace! first-root "prf/canonical/hash.clj")
     (write-namespace! second-root "prf/canonical/hash.clj")
-    (is (= 2 (count (get (runner/canonical-namespace-inventory
+    (is (= 2 (count (get (runner/namespace-inventory
                          [(str first-root) (str second-root)])
                         "prf/canonical/hash.clj"))))
     (is (= 2 (count (get (runner/duplicate-canonical-namespaces
                          [(str first-root) (str second-root)])
                         "prf/canonical/hash.clj"))))
     (is (empty? (runner/duplicate-canonical-namespaces [(str first-root)])))))
+
+(deftest duplicate-notebook-support-sources-must-match
+  (let [first-root (temp-dir)
+        second-root (temp-dir)
+        source-path "resolver_sim/notebook_support/theme.clj"
+        source-a "(ns resolver-sim.notebook-support.theme)\n(def color :teal)\n"
+        source-b "(ns resolver-sim.notebook-support.theme)\n(def color :blue)\n"
+        matching (do (write-source! first-root source-path source-a)
+                     (write-source! second-root source-path source-a)
+                     (runner/namespace-inventory [(str first-root) (str second-root)]))]
+    (is (empty? (runner/conflicting-notebook-source-copies matching)))
+    (write-source! second-root source-path source-b)
+    (let [divergent (runner/namespace-inventory [(str first-root) (str second-root)])]
+      (is (= 2 (count (get divergent source-path))))
+      (is (= 2 (count (get (runner/conflicting-notebook-source-copies divergent)
+                           source-path)))))))
 
 (deftest canonical-duplicate-check-includes-jars
   (let [source-root (temp-dir)

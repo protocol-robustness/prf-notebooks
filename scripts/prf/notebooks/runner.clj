@@ -50,8 +50,10 @@
              :packages (contains? supplied "--packages")
              :all (contains? supplied "--all")})))
 
-(defn canonical-namespace-inventory [classpath-paths]
-  (let [namespace-path? #(re-matches #"prf/canonical/[^/]+\.clj" %)
+(defn namespace-inventory [classpath-paths]
+  (let [namespace-path? #(or (re-matches #"prf/canonical/[^/]+\.clj" %)
+                             (re-matches #"resolver_sim/notebook_support/.+\.clj" %)
+                             (re-matches #"notebooks/.+\.clj" %))
         directory-entries
         (mapcat (fn [entry]
                   (let [root (Paths/get (str entry) (make-array String 0))]
@@ -84,8 +86,35 @@
                          [namespace (mapv second sources)]))))))
 
 (defn duplicate-canonical-namespaces [classpath-paths]
-  (into {} (filter (fn [[_ sources]] (> (count sources) 1))
-                   (canonical-namespace-inventory classpath-paths))))
+  (into {} (filter (fn [[namespace sources]]
+                     (and (str/starts-with? namespace "prf/canonical/")
+                          (> (count sources) 1)))
+                   (namespace-inventory classpath-paths))))
+
+(defn source-fingerprint [source]
+  (let [separator (.lastIndexOf ^String source "!/")
+        bytes (if (neg? separator)
+                (Files/readAllBytes (Paths/get source (make-array String 0)))
+                (let [jar-path (subs source 0 separator)
+                      entry-name (subs source (+ separator 2))]
+                  (with-open [jar (JarFile. jar-path)]
+                    (if-let [entry (.getEntry jar entry-name)]
+                      (with-open [stream (.getInputStream jar entry)]
+                        (.readAllBytes stream))
+                      (throw (ex-info "Classpath JAR entry disappeared"
+                                      {:source source}))))))
+        digest (MessageDigest/getInstance "SHA-256")]
+    (apply str (map #(format "%02x" (bit-and 0xff %)) (.digest digest bytes)))))
+
+(defn conflicting-notebook-source-copies [namespace-sources]
+  (into {}
+        (filter (fn [[_ sources]]
+                  (> (count (set (map source-fingerprint sources))) 1)))
+        (filter (fn [[namespace sources]]
+                  (and (or (str/starts-with? namespace "resolver_sim/notebook_support/")
+                           (str/starts-with? namespace "notebooks/"))
+                       (> (count sources) 1)))
+                namespace-sources)))
 
 (defn git-sha [alias coordinate]
   (get-in deps-config [:aliases alias :extra-deps coordinate :git/sha]))
@@ -261,9 +290,15 @@
         cp (command-output command repo-root)
         path-separator (re-pattern (java.util.regex.Pattern/quote java.io.File/pathSeparator))
         paths (str/split cp path-separator)
-        duplicates (duplicate-canonical-namespaces paths)]
-    (when (seq duplicates)
-      (fail! (str "Duplicate prf.canonical source namespaces on classpath: " (pr-str duplicates))))
+        inventory (namespace-inventory paths)
+        canonical-duplicates (duplicate-canonical-namespaces paths)
+        source-conflicts (conflicting-notebook-source-copies inventory)]
+    (when (seq canonical-duplicates)
+      (fail! (str "Duplicate prf.canonical source namespaces on classpath: "
+                  (pr-str canonical-duplicates))))
+    (when (seq source-conflicts)
+      (fail! (str "Divergent PRF notebook source copies on classpath: "
+                  (pr-str source-conflicts))))
     cp))
 
 (defn build-command [id flags output]

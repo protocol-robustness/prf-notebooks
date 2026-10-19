@@ -49,5 +49,9 @@ The runner passes the managed PRF root as the JVM user.dir for hosted notebooks.
 
 portable-canonical-package imports the pinned prf-canonical package directly. The runner checks for duplicate prf.canonical source namespaces on the resolved classpath. The example uses its own domain tag and does not change any PRF canonical identities.
 
+For PRF-hosted notebooks, the pinned PRF checkout and this source snapshot both
+contain notebook files and presentation helpers. The runner permits those copies
+only when their source bytes match; canonical namespaces may never appear twice.
+
 The source snapshot is recorded in `PROVENANCE.md`. No notebook package or
 rendered site has been published from this repository.
