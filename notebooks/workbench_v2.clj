@@ -23,6 +23,12 @@
 
 (defonce !world-cache (atom {}))
 
+^{:nextjournal.clerk/visibility {:code :hide :result :hide}}
+(def snapshot-scenarios
+  (->> (get-in (speds-data/load-run-artifacts) [:coverage :scenarios])
+       (sort-by :id)
+       vec))
+
 (defn- world-for-trace
   "Replay a scenario trace and cache the terminal world keyed by scenario-id."
   [trace-path cache]
@@ -248,6 +254,29 @@
 
      ;; 2. Observable Sections
      [:div.grid-layout
+
+      ;; Stable static scenario cards for reproducible review and screenshots.
+      [:div.card.scenario-snapshot-card {:style {:grid-column "span 12"}}
+       [:div.card-title "Scenario Snapshot"]
+       [:div {:style {:fontSize "12px" :color "#94a3b8" :marginBottom "12px"}}
+        "Expand the catalogue, then open a pinned trace card. These cards display fixture data and do not change simulation inputs or results."]
+       [:details.scenario-snapshot-root
+        [:summary.scenario-summary (str "Pinned scenario traces (" (count scenarios) ")")]
+        (for [scenario scenarios
+              :let [scenario-id (str (:id scenario))
+                    trace-path (scenario->trace-path scenario)
+                    trace (try (common/read-json trace-path) (catch Exception _ nil))]]
+          [:details.scenario-details.scenario-snapshot-item
+           {:data-scenario-id scenario-id}
+           [:summary.scenario-summary scenario-id]
+           (if trace
+             [:div {:style {:fontSize "11px" :color "#cbd5e1" :padding "8px"}}
+              [:div (str "Purpose: " (or (:purpose scenario) "n/a"))]
+              [:div (str "Threat tags: " (str/join ", " (map name (or (:threat-tags scenario) []))))]
+              [:pre {:style {:whiteSpace "pre-wrap" :overflowWrap "anywhere"}}
+               (pr-str (select-keys trace [:scenario-id :title :events]))]]
+             [:div {:style {:color "#ef4444" :padding "8px"}}
+              (str "Trace could not be loaded from " trace-path)])])]]
 
       ;; A0. Dispute-forking family focus (research workflow)
       [:div.card {:style {:grid-column "span 12"}}

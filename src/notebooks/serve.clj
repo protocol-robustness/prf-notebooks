@@ -3,26 +3,49 @@
             [clojure.java.io :as io]
             [resolver-sim.config.hardening :as hardening]
             [resolver-sim.logging :as log])
-  (:import [java.nio.file Paths]))
+  (:import [java.nio.file Files LinkOption Path Paths]
+           [java.nio.file.attribute FileAttribute]))
 
 (defn- notebook-root []
   (if-let [resource (io/resource "notebooks/index.clj")]
     (.getParent (Paths/get (.toURI resource)))
     (throw (ex-info "Cannot locate extracted notebook sources on the classpath" {}))))
 
-(defn- show-notebook! [^java.nio.file.Path root filename]
-  (let [path (.resolve root filename)]
+(defn- install-notebook-route! [^Path root]
+  (let [cwd (.toAbsolutePath (Paths/get "." (make-array String 0)))
+        route-root (.resolve cwd "notebooks")
+        target (.toRealPath root (make-array LinkOption 0))]
+    (if (Files/exists route-root (into-array LinkOption [LinkOption/NOFOLLOW_LINKS]))
+      (if (and (Files/isSymbolicLink route-root)
+               (= target (.toRealPath route-root (make-array LinkOption 0))))
+        false
+        (throw (ex-info "Cannot expose extracted notebooks at ./notebooks: path already exists"
+                        {:path (str route-root) :source (str target)})))
+      (do
+        (Files/createSymbolicLink route-root target (make-array FileAttribute 0))
+        (log/info! "notebook/source-route-installed"
+                   {:path (str route-root) :source (str target) :cleanup :jvm-shutdown})
+        (.addShutdownHook
+         (Runtime/getRuntime)
+         (Thread. ^Runnable (fn [] (Files/deleteIfExists route-root))
+                  "prf-notebooks-route-cleanup"))
+        true))))
+
+(defn- show-notebook! [^Path root filename]
+  (let [path (.resolve root filename)
+        route-path (str (.resolve (Paths/get "notebooks" (make-array String 0)) filename))]
     (if (.exists (.toFile path))
-      (clerk/show! (str path))
+      (clerk/show! route-path)
       (log/warn! "notebook/server-skipping-missing" {:path (str path)}))))
 
 (defn -main []
   (let [port (hardening/value :notebook-port {:fallback 7777})
         nrepl-port (hardening/value :notebook-api-port {:fallback 7778})
         root (notebook-root)]
+    (install-notebook-route! root)
     (log/info! "notebook/server-starting" {:port port})
-    (println (str "Starting Clerk notebook server on http://localhost:" port "/notebooks/xtdr_overview"))
-    (clerk/serve! {:watch-paths ["src" "data" "protocols_src" (str root)]
+    (println (str "Starting Clerk notebook server on http://localhost:" port "/notebooks/xtdr_overview.clj"))
+    (clerk/serve! {:watch-paths ["src" "data" "protocols_src" "notebooks"]
                    :browse true
                    :port port
                    :render-nrepl {:port nrepl-port}})

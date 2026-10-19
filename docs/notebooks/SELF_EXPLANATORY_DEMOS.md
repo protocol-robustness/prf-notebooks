@@ -1,5 +1,9 @@
 # Self-explanatory notebook demonstrations
 
+> **PRF-hosted workflow:** The `bb` commands below run from the
+> `protocol-robustness-framework` checkout. The standalone `prf-notebooks` repository
+> provides `bin/prf-notebooks` for listing, explicit setup, and notebook evaluation.
+
 A notebook can explain a concrete use case without making that use case part of
 the framework. This distinction is especially important for the `not admitted`
 material: admission and verification are reusable framework capabilities, while

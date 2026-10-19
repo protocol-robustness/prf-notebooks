@@ -1,7 +1,13 @@
 # Interactive Workbenches (Clerk Notebooks)
 
-The repository ships 31 interactive workbenches built with
-[Clerk](https://clerk.vision). They are evidence-oriented, not dashboards —
+> **PRF-hosted guide:** This document describes using the notebooks inside the
+> `protocol-robustness-framework` integration checkout. Its `clojure -M:clerk`, `bb`,
+> and `make` commands are owned by that checkout. In this standalone repository, use
+> `bin/prf-notebooks list`, `setup`, and `run` as documented in the repository root
+> [README](../../README.md).
+
+The registry in `data/notebooks.edn` defines the current set of interactive
+workbenches built with [Clerk](https://clerk.vision). They are evidence-oriented, not dashboards —
 each one shows raw data, artifact provenance, and honest confidence levels
 rather than status indicators alone.
 

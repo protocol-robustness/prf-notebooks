@@ -1,5 +1,12 @@
 # Screenshot Export for Notebooks
 
+> **PRF-hosted workflow:** This guide describes the screenshot site and `bb notebook:*`
+> tasks owned by `protocol-robustness-framework`. Run those commands from a PRF checkout;
+> they are not commands provided by the standalone `prf-notebooks` repository. The
+> standalone interface currently supports registry listing, explicit dependency setup,
+> and qualified notebook evaluation through `bin/prf-notebooks`. Screenshot capture
+> remains a PRF-hosted workflow.
+
 ## 1. Goal
 
 Produce browser-accurate screenshots of Clerk notebooks for review, presentation, and
@@ -211,7 +218,10 @@ so the site can be refreshed without touching the Clerk server. To publish, uplo
 - Screenshots are evidence of **rendering**, not of correctness — keep `bb notebook:ci`
   as the correctness gate.
 
-## 7. CLI / bb tasks
+## 7. PRF-hosted CLI / bb tasks
+
+Run the following commands from the `protocol-robustness-framework` repository root.
+They rely on that repository's `bb.edn`, screenshot scripts, and live PRF Clerk server.
 
 ```shell
 bb notebook:shots          # full run from data/notebook-shots.edn into shots/ (new run archive + guided site)

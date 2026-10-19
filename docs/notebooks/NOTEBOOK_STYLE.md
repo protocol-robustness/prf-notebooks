@@ -1,5 +1,10 @@
 # Notebook Style Guide
 
+> **PRF-hosted workflow:** The `bb notebook:*` commands below are provided by
+> `protocol-robustness-framework`, not by the standalone `prf-notebooks` repository.
+> Run them from a PRF checkout. The standalone repository's supported interface is
+> `bin/prf-notebooks list`, `setup`, and `run`.
+
 ## Principles
 
 1. Notebooks are thin presentation layers over stable helper functions.
