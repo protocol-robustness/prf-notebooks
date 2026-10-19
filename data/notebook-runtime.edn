@@ -16,7 +16,7 @@
   :allocation
   {:git/url
    "https://github.com/protocol-robustness/prf-pro-rata-allocation.git",
-   :git/sha "0b7b2a8badbaa2c345e8b9626aa68907510fc52f",
+   :git/sha "48e0b362748cd39d09994a8aa1496c668199aa74",
    :deps/root "clj"}},
  :qualification-roots
  {:portable-canonical-package
@@ -37,7 +37,6 @@
   :benchmark-protocol-robustness :prf-hosted,
   :workbench-v2 :prf-hosted,
   :dispute-resolution :prf-hosted,
-  :component-gallery :prf-hosted,
   :canonical-cancellation :prf-hosted,
   :resubmission-chain :prf-hosted,
   :canonical-framing :prf-hosted,
@@ -46,7 +45,6 @@
   :evm-dependency-provenance :prf-hosted,
   :world-structure-workbench :prf-hosted,
   :notebook-comparison :prf-hosted,
-  :workbench-production :prf-hosted,
   :not-governance :prf-hosted,
   :invariant-failures :prf-hosted,
   :evidence-graph-viewer :prf-hosted,

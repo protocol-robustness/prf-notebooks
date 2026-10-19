@@ -37,6 +37,12 @@ bin/prf-notebooks is the setup and evaluation entry point. It works when invoked
 
 The registry classifies every entry as standalone, package-dependent, or prf-hosted. Standalone dependency resolution is an explicit setup --standalone step. Package and PRF host options are explicit opt-ins; if a managed checkout is missing, that selected command prepares it at the locked revision before evaluation. setup --packages, setup --prf-host, and setup --all prepare sources and resolve dependencies ahead of evaluation.
 
+`bin/prf-notebooks list` validates that every runnable registry entry has a
+source file in this repository. Archived metadata lives under
+`:archived-notebooks` and is excluded from runnable navigation and setup.
+Runner checks are available with `PRF_NOTEBOOKS_REPO="$PWD" clojure -Srepro
+-M:test`.
+
 Sources are cached under ~/.cache/prf-notebooks, or under PRF_NOTEBOOKS_CACHE. The runner only creates and checks out directories inside this managed cache. It does not change an existing PRF checkout. Its PRF Git alias and checkout URL/revision are cross-checked against data/notebook-runtime.edn before setup or evaluation.
 
 The runner passes the managed PRF root as the JVM user.dir for hosted notebooks. Relative reads of PRF-owned data/, etc/, results/, and scenarios/ therefore resolve against that explicit root regardless of the caller's directory. Qualification records include the actual source revision, fixture tree identities, normalized resolved classpath, output marker checks, and output hashes.

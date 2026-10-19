@@ -6,6 +6,7 @@
             [clojure.pprint :as pprint]
             [clojure.string :as str])
   (:import [java.nio.file Files Path Paths LinkOption]
+           [java.util.jar JarFile]
            [java.security MessageDigest]))
 
 (defn fail! [message]
@@ -27,6 +28,64 @@
 (def deps-config
   (edn/read-string (slurp (.toFile (.resolve repo-root "deps.edn")))))
 (def by-id (into {} (map (juxt :id identity) (:notebooks registry))))
+
+(defn registry-source-errors [root notebook-registry]
+  (->> (:notebooks notebook-registry)
+       (keep (fn [{:keys [id path]}]
+               (when-not (and (string? path)
+                              (Files/isRegularFile (.resolve ^Path root path)
+                                                   (make-array LinkOption 0)))
+                 {:notebook/id id :notebook/path path})))
+       vec))
+
+(defn setup-options [args]
+  (let [valid #{"--standalone" "--prf-host" "--packages" "--all"}
+        supplied (set args)
+        unknown (set/difference supplied valid)]
+    (cond
+      (seq unknown) {:error :unknown-options :options unknown}
+      (empty? supplied) {:error :missing-options}
+      :else {:standalone (contains? supplied "--standalone")
+             :prf-host (contains? supplied "--prf-host")
+             :packages (contains? supplied "--packages")
+             :all (contains? supplied "--all")})))
+
+(defn canonical-namespace-inventory [classpath-paths]
+  (let [namespace-path? #(re-matches #"prf/canonical/[^/]+\.clj" %)
+        directory-entries
+        (mapcat (fn [entry]
+                  (let [root (Paths/get (str entry) (make-array String 0))]
+                    (if (Files/isDirectory root (make-array LinkOption 0))
+                      (for [file (file-seq (.toFile root))
+                            :when (and (.isFile file)
+                                       (namespace-path?
+                                        (str/replace
+                                         (str (.relativize root (.toPath file)))
+                                         "\\" "/")))]
+                        [(str/replace (str (.relativize root (.toPath file))) "\\" "/")
+                         (str (.toAbsolutePath (.toPath file)))])
+                      [])))
+                classpath-paths)
+        jar-entries
+        (mapcat (fn [entry]
+                  (let [root (Paths/get (str entry) (make-array String 0))]
+                    (if (and (Files/isRegularFile root (make-array LinkOption 0))
+                             (str/ends-with? (str root) ".jar"))
+                      (with-open [jar (JarFile. (.toFile root))]
+                        (vec (for [item (enumeration-seq (.entries jar))
+                                   :let [name (.getName item)]
+                                   :when (and (not (.isDirectory item)) (namespace-path? name))]
+                               [name (str (.toAbsolutePath root) "!/" name)])))
+                      [])))
+                classpath-paths)]
+    (->> (concat directory-entries jar-entries)
+         (group-by first)
+         (into {} (map (fn [[namespace sources]]
+                         [namespace (mapv second sources)]))))))
+
+(defn duplicate-canonical-namespaces [classpath-paths]
+  (into {} (filter (fn [[_ sources]] (> (count sources) 1))
+                   (canonical-namespace-inventory classpath-paths))))
 
 (defn git-sha [alias coordinate]
   (get-in deps-config [:aliases alias :extra-deps coordinate :git/sha]))
@@ -51,6 +110,11 @@
       (fail! (str "Notebook classifications do not match registry. Unclassified: "
                   (pr-str (set/difference registered classified))
                   "; unknown: " (pr-str (set/difference classified registered)))))
+    (when-not (every? #{:standalone :package-dependent :prf-hosted}
+                      (vals (:notebooks config)))
+      (fail! "Every runnable notebook must have a supported dependency classification."))
+    (when-let [missing (seq (registry-source-errors repo-root registry))]
+      (fail! (str "Notebook registry paths are missing: " (pr-str missing))))
     (when-not (= expected actual)
       (fail! (str "Pinned Git revisions diverge between data/notebook-runtime.edn and deps.edn: "
                   (pr-str {:runtime expected :deps-edn actual}))))
@@ -147,11 +211,14 @@
   (let [path (Paths/get entry (make-array String 0))
         absolute (if (.isAbsolute path) path (.resolve repo-root path))
         absolute (.normalize absolute)
+        gitlibs-root (Paths/get (str (System/getProperty "user.home") "/.gitlibs/libs")
+                                (make-array String 0))
         m2-root (Paths/get (str (System/getProperty "user.home") "/.m2/repository")
                            (make-array String 0))]
     (cond
       (.startsWith absolute cache-root) (str "managed:" (.relativize cache-root absolute))
       (.startsWith absolute repo-root) (str "repo:" (.relativize repo-root absolute))
+      (.startsWith absolute gitlibs-root) (str "gitlibs:" (.relativize gitlibs-root absolute))
       (.startsWith absolute m2-root) (str "maven:" (.relativize m2-root absolute))
       :else entry)))
 
@@ -194,16 +261,7 @@
         cp (command-output command repo-root)
         path-separator (re-pattern (java.util.regex.Pattern/quote java.io.File/pathSeparator))
         paths (str/split cp path-separator)
-        canonical-sources
-        (for [path paths
-              :let [root (Paths/get path (make-array String 0))]
-              :when (Files/isDirectory root (make-array LinkOption 0))
-              file (file-seq (.toFile root))
-              :when (and (.isFile file)
-                         (re-matches #"prf/canonical/[^/]+\.clj"
-                                     (str (.relativize root (.toPath file)))))]
-          (str (.toAbsolutePath (.toPath file))))
-        duplicates (->> canonical-sources frequencies (filter (fn [[_ n]] (> n 1))))]
+        duplicates (duplicate-canonical-namespaces paths)]
     (when (seq duplicates)
       (fail! (str "Duplicate prf.canonical source namespaces on classpath: " (pr-str duplicates))))
     cp))
@@ -284,7 +342,7 @@
                     :source/revision (source-revision repo-root)
                     :prf-host/revision (when (= category :prf-hosted)
                                          (command-output ["git" "rev-parse" "HEAD"] (host-path)))
-                    :resource/root (str resource-root)
+                    :resource/root (normalized-classpath-entry (str resource-root))
                     :resource/root-source-revision (when (= category :prf-hosted)
                                                      (command-output ["git" "rev-parse" "HEAD"]
                                                                      (host-path)))
@@ -318,12 +376,11 @@
     (try
       (case command
         "list" (print-list!)
-        "setup" (let [flags (set tail)]
-                (when (empty? flags) (fail! "Use setup --standalone, --prf-host, --packages, or --all."))
-                (setup! {:standalone (contains? flags "--standalone")
-                         :prf-host (contains? flags "--prf-host")
-                           :packages (contains? flags "--packages")
-                           :all (contains? flags "--all")}))
+        "setup" (let [options (setup-options tail)]
+                  (when-let [error (:error options)]
+                    (fail! (str "Invalid setup options: " (pr-str options)
+                                ". Use --standalone, --prf-host, --packages, or --all.")))
+                  (setup! options))
         "run" (let [[id & options] tail]
                 (when-not id (fail! "Use run <notebook-id> [--with-prf-host] [--with-packages]."))
                 (run-notebook! (keyword id) (parse-flags options)))

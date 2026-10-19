@@ -7,8 +7,7 @@
 ;; Sew contributors · Mechanism design / dispute resolution researchers.
 ;;
 ;; **Purpose:** Exploratory validation workbench, complete for its current Sew
-;; Protocol dispute-resolution workload.
-;; subsystem. Every status indicator is paired with:
+;; Protocol dispute-resolution workload. Every status indicator is paired with:
 ;; - what it means,
 ;; - what it does **not** mean,
 ;; - the source artifact backing it,

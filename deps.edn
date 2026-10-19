@@ -5,7 +5,10 @@
         metosin/malli {:mvn/version "0.17.0"}
         hiccup/hiccup {:mvn/version "2.0.0-RC3"}}
  :aliases
- {:prf-host
+ {:test {:extra-paths ["test" "scripts"]
+         :main-opts ["-m" "prf.notebooks.test-runner"]}
+
+  :prf-host
   {:extra-deps
    {protocol-robustness/framework
     {:git/url "https://github.com/protocol-robustness/protocol-robustness-framework.git"
@@ -21,7 +24,7 @@
      :deps/root "clj"}
     prf/pro-rata-allocation
     {:git/url "https://github.com/protocol-robustness/prf-pro-rata-allocation.git"
-     :git/sha "0b7b2a8badbaa2c345e8b9626aa68907510fc52f"
+     :git/sha "48e0b362748cd39d09994a8aa1496c668199aa74"
      :deps/root "clj"}}}
 
   :clerk
