@@ -243,11 +243,11 @@
 
 ^{:nextjournal.clerk/visibility {:code :hide :result :show}}
 (clerk/table
- {:head ["Boundary" "Framework check" "Expected behavior" "Observed" "Fail-closed behavior" "Application owns"]
+ {:head ["Boundary" "Expected behavior" "Check result" "Observed" "Fail-closed behavior" "Application owns"]
   :rows (mapv (fn [{:keys [boundary framework-role expected? fail-closed? observation application-owns]}]
                 [boundary framework-role
-                 (if expected? "OBSERVED" "CHECK FAILED")
-                 (if expected? "✓" "✗")
+                 (if expected? "PASS" "FAIL")
+                 (or observation (if expected? "Expected outcome observed" "Unexpected outcome"))
                  (if fail-closed? "REJECTED" "ERROR")
                  application-owns])
               boundary-results)})

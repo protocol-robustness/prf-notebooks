@@ -1,8 +1,7 @@
 ^{:nextjournal.clerk/visibility {:code :fold}
   :nextjournal.clerk/dark-mode true}
 (ns notebooks.equilibrium-artifact
-  (:require [nextjournal.clerk :as clerk]
-            [resolver-sim.notebook-support.common :as common]))
+  (:require [nextjournal.clerk :as clerk]))
 
 ;; # Sew Protocol — Technical Validation Story
 ;; ## Equilibrium Failure Observatory: Multi-Epoch Reputation Dynamics

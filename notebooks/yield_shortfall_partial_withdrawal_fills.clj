@@ -95,7 +95,7 @@
 ;; ### T0–T2: Normal Starting State
 
 ^{:nextjournal.clerk/visibility {:code :hide :result :show}}
-(let [s (first (:snapshots result))]
+(let [_snapshot (first (:snapshots result))]
   (clerk/html
     [:div {:style {:background "#0f172a" :border "1px solid #004D59"
                    :borderRadius "8px" :padding "16px" :marginTop "12px"}}

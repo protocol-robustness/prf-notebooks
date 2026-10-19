@@ -122,8 +122,7 @@
        {:label "Status"
         :rag rag
          :value (if report
-                  (let [cls (get-in report [:scoring/classification :classification-label])
-                        maturity (get-in report [:scoring/classification :claim-maturity :label])]
+                  (let [cls (get-in report [:scoring/classification :classification-label])]
                    (or cls (if (:all-pass? report) "Scenario replay passed" "Scenario replay failed")))
                  "Not run")
          :note (if report

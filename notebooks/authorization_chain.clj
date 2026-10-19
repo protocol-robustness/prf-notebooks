@@ -28,7 +28,6 @@
 (ns notebooks.authorization-chain
   (:require [nextjournal.clerk :as clerk]
             [clojure.data.json :as json]
-            [clojure.string :as str]
             [resolver-sim.allocation.activation :as act]
             [resolver-sim.allocation.kernel :as kernel]
             [resolver-sim.pro-rata.allocation :as allocation]
@@ -192,7 +191,7 @@
       preserved? (get-in review-threaded [:checks :three-member-classifications :holds?])
       fixed-pt? (get-in review-threaded [:checks :classifications-fixed-point :holds?])
       tampered (update-in report [:valid-supporting-positions 0] (fn [p]
-                                                                   (update-in p [:decision/hash] (fn [h] (str "sha256:" (apply str (take 64 (cycle "0"))))))))
+                                                                   (update-in p [:decision/hash] (fn [_h] (str "sha256:" (apply str (take 64 (cycle "0"))))))))
       tampered-check (rac/check-aggregate-three-member-classifications (:round review-report) tampered)]
   (panel
    [:div {:style {:color "#7ADDDC" :fontWeight 700 :marginBottom "8px"}}

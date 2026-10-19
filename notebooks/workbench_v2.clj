@@ -145,8 +145,9 @@
               (let [sid (:scenario-id trace)
                     wf-map (workflow-actions (:events trace) sid)]
                 (reduce-kv (fn [m wf-id wf-data]
-                             (update-in m [wf-id :scenarios] (fnil conj #{}) sid)
-                             (update-in m [wf-id :events] into (:events wf-data)))
+                             (-> m
+                                 (update-in [wf-id :scenarios] (fnil conj #{}) sid)
+                                 (update-in [wf-id :events] into (:events wf-data))))
                            acc wf-map)))
             {} traces)))
 

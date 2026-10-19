@@ -5,8 +5,6 @@
   "Yield Shortfall Handling Demo: Data-Driven General Yield.
    Targeted at non-expert readers evaluating the Protocol Robustness Framework."
   (:require [nextjournal.clerk :as clerk]
-            [clojure.string :as str]
-            [resolver-sim.notebook-support.yield-scenarios :as ys]
             [resolver-sim.protocols.yield :as yp]
             [resolver-sim.contract-model.replay :as replay]
             [resolver-sim.scenario.normalize :as normalize]))
@@ -80,7 +78,6 @@
         fulfilled (if shortfall
                     (double (get shortfall :fulfilled-amount 0))
                     (+ principal realized))
-        status (get pos :status)
         shortfall? (or (pos? deferred) (pos? (double (get shortfall :haircut-amount 0))))]
     {:demo/title title
      :scenario/id (:scenario-id normalized)
@@ -110,8 +107,7 @@
 
 ^{:nextjournal.clerk/visibility {:code :hide :result :hide}}
 (defn outcome-box [vm]
-  (let [pass? (= :pass (get-in vm [:raw/result :outcome]))
-        shortfall? (:outcome/shortfall-affected vm)
+  (let [shortfall? (:outcome/shortfall-affected vm)
         color (cond (not shortfall?) "#10b981"
                     (not (:outcome/final-loss vm)) "#f59e0b"
                     :else "#ef4444")

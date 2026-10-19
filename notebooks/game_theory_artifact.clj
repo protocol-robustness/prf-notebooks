@@ -1,8 +1,7 @@
 ^{:nextjournal.clerk/visibility {:code :fold}
   :nextjournal.clerk/dark-mode true}
 (ns notebooks.game-theory-artifact
-  (:require [nextjournal.clerk :as clerk]
-            [resolver-sim.notebook-support.common :as common]))
+  (:require [nextjournal.clerk :as clerk]))
 
 ;; # Sew Protocol — Technical Validation Story
 ;; ## Game Theory & Incentive Compatibility Surface (bounded)

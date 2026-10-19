@@ -284,7 +284,6 @@ timeline
 
 ^{:nextjournal.clerk/visibility {:code :hide :result :show}}
 (let [{:keys [before-challenge after-challenge before-settlement final]} @walkthrough
-      wf (:workflow-id appealed-escrow-example)
       checks [["Third-party challenge accepted" (true? (get-in (nth (:steps @walkthrough) 3) [:result :ok]))]
               ["Challenge occurred before deadline" (< (:challenge (:times appealed-escrow-example)) (:challenge/deadline before-challenge))]
               ["Prior provisional resolution existed" (:pending/active? before-challenge)]

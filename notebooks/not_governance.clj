@@ -401,8 +401,8 @@
               [:td {:style {:padding "8px" :textAlign "right" :color (if (pos? (:slash-rate br)) "#f59e0b" "#64748b")}} (format "%.1f%%" (double (* 100 (:slash-rate br))))]
               [:td {:style {:padding "8px" :textAlign "right" :color (if (pos? (:escaped-harm br)) "#f59e0b" "#22c55e")}} (format "%.0f" (double (:escaped-harm br)))]]))]
     (views/notice-box "What to notice"
-                      (str "At default bond (10%), the state machine absorbs attacks.")
-                      (str "At breakeven bond (210%), rising detection produces a visible slash rate.")
+                      "At default bond (10%), the state machine absorbs attacks."
+                      "At breakeven bond (210%), rising detection produces a visible slash rate."
                       "The sweep indicates: bond-at-stake must be high enough for detection to act as a meaningful security layer."
                       "The state machine -- not the bond -- is the load-bearing security mechanism.")]))
 

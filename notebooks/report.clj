@@ -53,8 +53,8 @@
                                                    table-small-style table-tight-style
                                                    table-header-row-style
                                                    table-header-cell-style
-                                                   table-cell-style table-cell-compact-style
-                                                   status-style status-badge-base-style
+                                                   table-cell-compact-style
+                                                   status-badge-base-style
                                                    kind-badge-style]]
             [resolver-sim.io.scenario-fixture-sync :as sync]))
 
@@ -177,12 +177,10 @@
   (fn []
     (let [summary    test-summary
           rd         (:risk_digest summary)
-          sc         (:status_counts summary)
           trace-n    (count all-traces)
           trace-ids  (set (map :id all-traces))
           corpus-goldens (into {} (filter (fn [[k _]] (contains? trace-ids k)) golden-reports))
           corpus-outcomes (frequencies (map :outcome (vals corpus-goldens)))
-          corpus-pass-n (get corpus-outcomes :pass 0)
           corpus-fail-n (get corpus-outcomes :fail 0)
           replay-missing-n (- trace-n (count corpus-goldens))
           expected-negative-n (count (filter #(= :expected-negative

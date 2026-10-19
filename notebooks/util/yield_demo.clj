@@ -11,8 +11,7 @@
 
    Label: illustrative model using real partial-fill engine."
   (:require [resolver-sim.yield.partial-fill :as pf]
-            [resolver-sim.yield.position :as pos]
-            [clojure.string :as str]))
+            [resolver-sim.yield.position :as pos]))
 
 (def default-module-state
   {:total-principal 0
@@ -80,10 +79,9 @@
             (update :events conj event)))
 
       :accrue
-      (let [positions (:positions state)]
-        (-> state
-            (assoc :phase-label "after yield accrual")
-            (update :events conj event)))
+      (-> state
+          (assoc :phase-label "after yield accrual")
+          (update :events conj event))
 
       :set-liquidity-shortfall
       (let [ratio (double (:available-ratio event))
@@ -235,7 +233,7 @@
         total-req (reduce + 0 (map :requested outcomes))
         total-filled (reduce + 0 (map :filled outcomes))
         total-deferred (reduce + 0 (map :deferred outcomes))
-        users (count (distinct (map :user outcomes)))]
+        _users (count (distinct (map :user outcomes)))]
     {"Total requested" (str total-req " USDC")
      "Total fulfilled" (str total-filled " USDC")
      "Overall fill rate" (str (format "%.1f" (double (* 100 (/ total-filled (max 1 total-req))))) "%")

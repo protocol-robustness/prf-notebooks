@@ -6,8 +6,7 @@
    No Sew protocol dependency. Pure evaluation pipeline."
   (:require [nextjournal.clerk :as clerk]
             [resolver-sim.hash.canonical :as hc]
-            [resolver-sim.pro-rata.evaluation :as pro-rata-evaluation]
-            [resolver-sim.pro-rata.evidence :as pro-rata-evidence]))
+            [resolver-sim.pro-rata.evaluation :as pro-rata-evaluation]))
 
 ;; # Pro-Rata Evaluation API
 ;; ## Content-Addressed Allocation with Deterministic Replay
@@ -90,7 +89,7 @@
           tampered (assoc-in evaluation [:result :artifact/value] tampered-value)]
       (pro-rata-evaluation/validate-pro-rata-evaluation-package! tampered)
       :unexpected-pass)
-    (catch Exception e
+    (catch Exception _e
       :hash-mismatch-detected)))
 
 ^{:nextjournal.clerk/visibility {:code :hide :result :show}}

@@ -29,7 +29,6 @@
 (ns notebooks.allocation-activation
   (:require [nextjournal.clerk :as clerk]
             [clojure.data.json :as json]
-            [clojure.string :as str]
             [resolver-sim.allocation.activation :as act]
             [resolver-sim.allocation.realized-statement :as rs]
             [resolver-sim.allocation.kernel :as kernel]

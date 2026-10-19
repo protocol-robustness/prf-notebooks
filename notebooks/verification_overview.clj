@@ -12,7 +12,7 @@
 
 ^{:nextjournal.clerk/toc true
   :nextjournal.clerk/dark-mode true
-  :nextjournal.clerk/visibility {:code :hide}}
+  :nextjournal.clerk/visibility {:code :fold}}
 (ns notebooks.verification-overview
   (:require [nextjournal.clerk :as clerk]))
 

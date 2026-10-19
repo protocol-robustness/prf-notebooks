@@ -52,7 +52,7 @@
    [:div {:style {:fontSize "24px" :fontWeight 800 :color "#ffffff"}} value]
    [:div {:style {:fontSize "11px" :color "#cbd5e1"}} subtitle]])
 
-(let [artifacts (data/load-run-artifacts)
+(let [_artifacts (data/load-run-artifacts)
       base-events (load-events base-scenario)
       cf-events (load-events cf-scenario)
       findings (or (:findings (common/read-json "results/test-artifacts/findings.json")) [])

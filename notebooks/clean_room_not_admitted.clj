@@ -14,7 +14,6 @@
   (:require [nextjournal.clerk :as clerk]
             [clojure.string :as str]
             [resolver-sim.notebook-support.common :as common]
-            [resolver-sim.notebook-support.checks :as checks]
             [resolver-sim.conformance.bundle :as bundle]
             [clojure.set :as set]))
 

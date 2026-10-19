@@ -19,7 +19,7 @@
             [resolver-sim.notebook-support.manifest.dag :as dag]
             [resolver-sim.notebook-support.manifest.claims :as claims]
             [resolver-sim.notebook-support.manifest.diff :as diff]
-            [resolver-sim.notebook-support.manifest.publication :as pub]))
+            ))
 
 ;; # Protocol Provenance
 ;; ## Manifest Management Cockpit
@@ -206,7 +206,7 @@
             :note   (str (count (get registry :artifacts [])) " artifact(s)")}
            {:label "Git commit recorded"
             :status (if (get-in manifest [:framework :git_commit]) :pass :warn)
-            :note   (or (get-in manifest [:framework :git_commit] "not recorded"))}
+            :note   (get-in manifest [:framework :git_commit] "not recorded")}
            {:label "Environment recorded"
             :status (if (get-in manifest [:environment :os]) :pass :warn)
             :note   (or (get-in manifest [:environment :python]) "not recorded")}
@@ -320,7 +320,6 @@
           node-w 160 node-h 54 h-gap 36 v-pad 20
           total-w (+ (* (count nodes) node-w) (* (dec (count nodes)) h-gap) (* 2 v-pad))
           svg-h   140
-          cx      (fn [i] (+ v-pad (* i (+ node-w h-gap)) (/ node-w 2)))
           render-node (fn [i {:keys [label note color]}]
                         (let [x  (+ v-pad (* i (+ node-w h-gap)))
                               y  32
@@ -340,7 +339,6 @@
           render-arrow (fn [i]
                          (let [x1 (+ v-pad (* i (+ node-w h-gap)) node-w)
                                x2 (+ v-pad (* (inc i) (+ node-w h-gap)))
-                               xm (/ (+ x1 x2) 2)
                                y  (+ 32 (/ node-h 2))]
                            [[:line {:x1 x1 :y1 y :x2 (- x2 8) :y2 y
                                     :stroke "#004D59" :stroke-width "1.5"}]
