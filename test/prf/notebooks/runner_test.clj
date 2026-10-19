@@ -87,12 +87,9 @@
                        :deps {'prf/accounting-reductions
                               {:local/root "packages/accounting-reductions/clj"}}}
         runtime-config (runner/host-dependency-config host-root source-config)]
-    (is (= [(str (.resolve host-root "src"))
-            (str (.resolve host-root "pro_rata_contract_src"))
-            (str (.resolve host-root "resources"))
-            (str (.resolve host-root "protocols_src"))]
+    (is (= ["src" "pro_rata_contract_src" "resources" "protocols_src"]
            (:paths runtime-config)))
-    (is (= (str (.resolve host-root "packages/accounting-reductions/clj"))
+    (is (= "packages/accounting-reductions/clj"
            (get-in runtime-config [:deps 'prf/accounting-reductions :local/root])))))
 
 (deftest missing-registry-paths-are-reported

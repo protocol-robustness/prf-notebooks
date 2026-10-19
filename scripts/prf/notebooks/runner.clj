@@ -5,7 +5,7 @@
             [clojure.set :as set]
             [clojure.pprint :as pprint]
             [clojure.string :as str])
-  (:import [java.nio.file Files Path Paths LinkOption]
+  (:import [java.nio.file Files Path Paths LinkOption CopyOption StandardCopyOption]
            [java.util.jar JarFile]
            [java.security MessageDigest]))
 
@@ -155,35 +155,114 @@
 (defn host-path []
   (.resolve cache-root (str "prf-host/" (get-in config [:prf-host :git/sha]))))
 (defn host-deps-path []
-  (.resolve cache-root (str "prf-host-deps/" (get-in config [:prf-host :git/sha]))))
+  (.resolve cache-root (str "prf-host-runtime/v1/" (get-in config [:prf-host :git/sha]))))
 (defn standalone-ready-path []
   (.resolve cache-root "ready/standalone"))
+
+(declare sha256-file)
+
+(defn- host-local-roots [^Path host-root source-config]
+  (->> (:deps source-config)
+       vals
+       (keep :local/root)
+       (map (fn [root]
+              (let [path (Paths/get (str root) (make-array String 0))
+                    absolute (if (.isAbsolute path) path (.resolve host-root path))
+                    absolute (.normalize absolute)]
+                (when-not (.startsWith absolute host-root)
+                  (throw (ex-info "PRF host local dependency escapes its pinned checkout"
+                                  {:local/root root :host/root (str host-root)})))
+                (str (.relativize host-root absolute)))))
+       distinct
+       vec))
 
 (defn host-dependency-config [^Path host-root source-config]
   (let [paths (->> (concat (:paths source-config) ["protocols_src"])
                    (remove #{"."})
                    distinct
-                   (mapv #(str (.normalize (.resolve host-root %)))))
+                   vec)
         deps (into {}
                    (map (fn [[coordinate dependency]]
                           [coordinate
                            (if-let [local-root (:local/root dependency)]
                              (assoc dependency :local/root
-                                    (str (.normalize (.resolve host-root local-root))))
+                                    (let [path (Paths/get (str local-root) (make-array String 0))
+                                          absolute (if (.isAbsolute path) path (.resolve host-root path))]
+                                      (str (.relativize host-root (.normalize absolute)))))
                              dependency)]))
                    (:deps source-config))]
     (cond-> {:paths paths :deps deps}
       (:mvn/repos source-config) (assoc :mvn/repos (:mvn/repos source-config)))))
+
+(defn- managed-source-fingerprint [^Path root relative-dirs]
+  (let [files (->> relative-dirs
+                   (mapcat (fn [relative-dir]
+                             (let [dir (.resolve root relative-dir)]
+                               (when-not (Files/isDirectory dir (make-array LinkOption 0))
+                                 (throw (ex-info "Pinned PRF source directory is missing"
+                                                 {:directory (str dir)})))
+                               (filter #(.isFile ^java.io.File %)
+                                       (file-seq (.toFile dir))))))
+                   (map (fn [^java.io.File file]
+                          [(str/replace (str (.relativize root (.toPath file))) "\\" "/")
+                           (sha256-file (.toPath file))]))
+                   (sort-by first)
+                   vec)
+        digest (MessageDigest/getInstance "SHA-256")]
+    (apply str (map #(format "%02x" (bit-and 0xff %))
+                    (.digest digest (.getBytes (pr-str files) "UTF-8"))))))
+
+(defn- copy-host-source! [^Path host-root ^Path runtime-root relative-dir]
+  (let [source (.resolve host-root relative-dir)
+        target (.resolve runtime-root relative-dir)]
+    (when-not (Files/isDirectory source (make-array LinkOption 0))
+      (throw (ex-info "Pinned PRF source directory is missing" {:directory (str source)})))
+    (doseq [^java.io.File file (file-seq (.toFile source))]
+      (let [source-path (.toPath file)
+            relative (.relativize source source-path)
+            target-path (.resolve target relative)]
+        (when (Files/isSymbolicLink source-path)
+          (throw (ex-info "Symlinks are not allowed in the PRF source projection"
+                          {:source (str source-path)})))
+        (if (.isDirectory file)
+          (Files/createDirectories target-path
+                                   (make-array java.nio.file.attribute.FileAttribute 0))
+          (do
+            (Files/createDirectories (.getParent target-path)
+                                     (make-array java.nio.file.attribute.FileAttribute 0))
+            (Files/copy source-path target-path
+                        (into-array CopyOption [StandardCopyOption/REPLACE_EXISTING]))))))))
 
 (defn materialize-host-dependency! []
   (let [host-root (host-path)
         source-config (edn/read-string
                        (slurp (.toFile (.resolve host-root "deps.edn"))))
         runtime-config (host-dependency-config host-root source-config)
-        runtime-root (host-deps-path)]
+        runtime-root (host-deps-path)
+        source-paths (vec (distinct (concat (:paths runtime-config)
+                                            (host-local-roots host-root source-config))))
+        expected-fingerprint (managed-source-fingerprint host-root source-paths)
+        fingerprint-file (.resolve runtime-root ".source-fingerprint")]
     (Files/createDirectories runtime-root
                              (make-array java.nio.file.attribute.FileAttribute 0))
-    (spit (.toFile (.resolve runtime-root "deps.edn")) (pr-str runtime-config))
+    (if (Files/exists fingerprint-file (make-array LinkOption 0))
+      (let [recorded (str/trim (slurp (.toFile fingerprint-file)))
+            actual (managed-source-fingerprint runtime-root source-paths)
+            recorded-config (edn/read-string
+                             (slurp (.toFile (.resolve runtime-root "deps.edn"))))]
+        (when-not (and (= expected-fingerprint recorded)
+                       (= recorded actual)
+                       (= runtime-config recorded-config))
+          (fail! (str "Managed PRF source projection is stale or modified at " runtime-root))))
+      (do
+        (doseq [source-path source-paths]
+          (copy-host-source! host-root runtime-root source-path))
+        (let [actual (managed-source-fingerprint runtime-root source-paths)]
+          (when-not (= expected-fingerprint actual)
+            (fail! (str "Managed PRF source projection failed its source fingerprint check at "
+                        runtime-root)))
+          (spit (.toFile fingerprint-file) (str expected-fingerprint "\n"))
+          (spit (.toFile (.resolve runtime-root "deps.edn")) (pr-str runtime-config)))))
     runtime-root))
 
 (defn run-command! [args dir]
