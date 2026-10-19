@@ -13,9 +13,13 @@
   (binding [*out* *err*] (println message))
   (System/exit 2))
 
-(def repo-root
-  (-> (Paths/get (System/getenv "PRF_NOTEBOOKS_REPO") (make-array String 0))
-      .toAbsolutePath .normalize))
+(defn- discover-repo-root []
+  (if-let [configured (System/getenv "PRF_NOTEBOOKS_REPO")]
+    (-> (Paths/get configured (make-array String 0)) .toAbsolutePath .normalize)
+    (if-let [source (io/resource "notebooks/index.clj")]
+      (-> (Paths/get (.toURI source)) .getParent .getParent .toAbsolutePath .normalize)
+      (fail! "Cannot locate prf-notebooks source; set PRF_NOTEBOOKS_REPO."))))
+(def repo-root (discover-repo-root))
 (def cache-root
   (-> (Paths/get (or (System/getenv "PRF_NOTEBOOKS_CACHE")
                      (str (System/getProperty "user.home") "/.cache/prf-notebooks"))

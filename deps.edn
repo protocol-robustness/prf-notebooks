@@ -5,7 +5,7 @@
         metosin/malli {:mvn/version "0.17.0"}
         hiccup/hiccup {:mvn/version "2.0.0-RC3"}}
  :aliases
- {:test {:extra-paths ["test" "scripts"]
+ {:test {:extra-paths ["test"]
          :main-opts ["-m" "prf.notebooks.test-runner"]}
 
   :prf-host
