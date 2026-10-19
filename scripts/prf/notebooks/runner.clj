@@ -154,8 +154,37 @@
   (.resolve cache-root (str (name key) "/" (get-in config [:packages key :git/sha]))))
 (defn host-path []
   (.resolve cache-root (str "prf-host/" (get-in config [:prf-host :git/sha]))))
+(defn host-deps-path []
+  (.resolve cache-root (str "prf-host-deps/" (get-in config [:prf-host :git/sha]))))
 (defn standalone-ready-path []
   (.resolve cache-root "ready/standalone"))
+
+(defn host-dependency-config [^Path host-root source-config]
+  (let [paths (->> (concat (:paths source-config) ["protocols_src"])
+                   (remove #{"."})
+                   distinct
+                   (mapv #(str (.normalize (.resolve host-root %)))))
+        deps (into {}
+                   (map (fn [[coordinate dependency]]
+                          [coordinate
+                           (if-let [local-root (:local/root dependency)]
+                             (assoc dependency :local/root
+                                    (str (.normalize (.resolve host-root local-root))))
+                             dependency)]))
+                   (:deps source-config))]
+    (cond-> {:paths paths :deps deps}
+      (:mvn/repos source-config) (assoc :mvn/repos (:mvn/repos source-config)))))
+
+(defn materialize-host-dependency! []
+  (let [host-root (host-path)
+        source-config (edn/read-string
+                       (slurp (.toFile (.resolve host-root "deps.edn"))))
+        runtime-config (host-dependency-config host-root source-config)
+        runtime-root (host-deps-path)]
+    (Files/createDirectories runtime-root
+                             (make-array java.nio.file.attribute.FileAttribute 0))
+    (spit (.toFile (.resolve runtime-root "deps.edn")) (pr-str runtime-config))
+    runtime-root))
 
 (defn run-command! [args dir]
   (let [p (doto (ProcessBuilder. ^java.util.List (mapv str args))
@@ -201,7 +230,8 @@
   (validate-config!)
   (when (or (:prf-host flags) (:all flags))
     (ensure-checkout! (get-in config [:prf-host :git/url])
-                      (get-in config [:prf-host :git/sha]) (host-path)))
+                      (get-in config [:prf-host :git/sha]) (host-path))
+    (materialize-host-dependency!))
   (when (or (:packages flags) (:all flags))
     (doseq [[key package] (:packages config)]
       (ensure-checkout! (:git/url package) (:git/sha package) (managed-path key))))
@@ -278,12 +308,11 @@
 (defn local-deps-sdeps [flags]
   (let [deps (cond-> {}
                (:prf-host flags)
-               (assoc 'protocol-robustness/framework {:local/root (str (host-path))})
+               (assoc 'protocol-robustness/framework {:local/root (str (host-deps-path))})
                (:packages flags)
                (assoc 'prf/canonical {:local/root (str (.resolve (managed-path :canonical) "clj"))}
-                      'prf/pro-rata-allocation {:local/root (str (.resolve (managed-path :allocation) "clj"))}))
-        paths (cond-> [] (:prf-host flags) (conj (str (.resolve (host-path) "protocols_src"))))]
-    (pr-str {:deps deps :paths paths})))
+                      'prf/pro-rata-allocation {:local/root (str (.resolve (managed-path :allocation) "clj"))}))]
+    (pr-str {:deps deps})))
 
 (defn classpath-duplicates! [flags]
   (let [command ["clojure" "-Sdeps" (local-deps-sdeps flags) "-Spath"]
@@ -348,7 +377,8 @@
       (when-not (:prf-host flags)
         (fail! "This notebook is PRF-hosted; opt in with --with-prf-host."))
       (ensure-checkout! (get-in config [:prf-host :git/url])
-                        (get-in config [:prf-host :git/sha]) (host-path)))
+                        (get-in config [:prf-host :git/sha]) (host-path))
+      (materialize-host-dependency!))
     (when (= category :package-dependent)
       (when-not (:packages flags)
         (fail! "This notebook needs extracted packages; opt in with --with-packages."))

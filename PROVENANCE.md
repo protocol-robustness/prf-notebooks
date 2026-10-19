@@ -11,6 +11,8 @@ copied into this repository were:
 - `src/notebooks/serve.clj`: source tree `4689665e8b46626aeb7d0b9b57d4eb08ac52646e`
 - `data/notebooks.edn`: `90f243007ccc803a4e4cd965e7d6dd3ed80b16c9`
 
-The notebook sources, support code, and documentation were copied without
-modifying their contents. Their runtime paths continue to resolve against the
-PRF integration checkout until that host migrates to this repository.
+The initial extraction copied the listed source trees without modifying their
+contents. The `src/resolver_sim/notebook_support/` snapshot was subsequently
+removed: these namespaces remain PRF-owned and PRF-hosted notebooks now load them
+from the exact pinned host checkout. The runner excludes the host repository
+root from the classpath, preventing duplicate notebook source files.

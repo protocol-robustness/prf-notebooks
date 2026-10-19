@@ -81,6 +81,20 @@
   (is (= {:standalone true :prf-host false :packages false :all false}
          (runner/setup-options ["--standalone"]))))
 
+(deftest host-classpath-excludes-repository-root-and-resolves-local-roots
+  (let [host-root (Paths/get "/managed/prf-host/fixture" (make-array String 0))
+        source-config {:paths ["." "src" "pro_rata_contract_src" "resources"]
+                       :deps {'prf/accounting-reductions
+                              {:local/root "packages/accounting-reductions/clj"}}}
+        runtime-config (runner/host-dependency-config host-root source-config)]
+    (is (= [(str (.resolve host-root "src"))
+            (str (.resolve host-root "pro_rata_contract_src"))
+            (str (.resolve host-root "resources"))
+            (str (.resolve host-root "protocols_src"))]
+           (:paths runtime-config)))
+    (is (= (str (.resolve host-root "packages/accounting-reductions/clj"))
+           (get-in runtime-config [:deps 'prf/accounting-reductions :local/root])))))
+
 (deftest missing-registry-paths-are-reported
   (let [registry {:notebooks [{:id :missing :path "notebooks/absent.clj"}]}]
     (is (= [{:notebook/id :missing :notebook/path "notebooks/absent.clj"}]
