@@ -51,7 +51,9 @@ For PRF-hosted notebooks, the runner builds a restricted classpath from the
 pinned PRF checkout's `src`, protocol, resource, and contract paths. It excludes
 the host repository root, so its notebook files do not shadow this repository's
 sources. Host presentation helpers load from the pinned PRF source tree; they
-are not copied here. Canonical namespaces may never appear twice.
+are not copied here. The projection omits PRF's older `src/notebooks/serve.clj`
+because this repository owns the server entry point. Canonical namespaces may
+never appear twice.
 
 The source snapshot is recorded in `PROVENANCE.md`. No notebook package or
 rendered site has been published from this repository.

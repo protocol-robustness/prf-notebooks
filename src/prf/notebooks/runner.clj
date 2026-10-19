@@ -159,7 +159,7 @@
 (defn host-path []
   (.resolve cache-root (str "prf-host/" (get-in config [:prf-host :git/sha]))))
 (defn host-deps-path []
-  (.resolve cache-root (str "prf-host-runtime/v1/" (get-in config [:prf-host :git/sha]))))
+  (.resolve cache-root (str "prf-host-runtime/v2/" (get-in config [:prf-host :git/sha]))))
 (defn standalone-ready-path []
   (.resolve cache-root "ready/standalone"))
 
@@ -210,6 +210,8 @@
                    (map (fn [^java.io.File file]
                           [(str/replace (str (.relativize root (.toPath file))) "\\" "/")
                            (sha256-file (.toPath file))]))
+                   (remove (fn [[relative-path _]]
+                             (= relative-path "src/notebooks/serve.clj")))
                    (sort-by first)
                    vec)
         digest (MessageDigest/getInstance "SHA-256")]
@@ -224,18 +226,20 @@
     (doseq [^java.io.File file (file-seq (.toFile source))]
       (let [source-path (.toPath file)
             relative (.relativize source source-path)
-            target-path (.resolve target relative)]
+            target-path (.resolve target relative)
+            projected-path (str/replace (str (.relativize runtime-root target-path)) "\\" "/")]
         (when (Files/isSymbolicLink source-path)
           (throw (ex-info "Symlinks are not allowed in the PRF source projection"
                           {:source (str source-path)})))
-        (if (.isDirectory file)
-          (Files/createDirectories target-path
-                                   (make-array java.nio.file.attribute.FileAttribute 0))
-          (do
-            (Files/createDirectories (.getParent target-path)
+        (when-not (= projected-path "src/notebooks/serve.clj")
+          (if (.isDirectory file)
+            (Files/createDirectories target-path
                                      (make-array java.nio.file.attribute.FileAttribute 0))
-            (Files/copy source-path target-path
-                        (into-array CopyOption [StandardCopyOption/REPLACE_EXISTING]))))))))
+            (do
+              (Files/createDirectories (.getParent target-path)
+                                       (make-array java.nio.file.attribute.FileAttribute 0))
+              (Files/copy source-path target-path
+                          (into-array CopyOption [StandardCopyOption/REPLACE_EXISTING])))))))))
 
 (defn materialize-host-dependency! []
   (let [host-root (host-path)
