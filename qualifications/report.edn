@@ -7,9 +7,9 @@
   :canonical/example-root nil,
   :sha256
   {"index.html"
-   "56ecc7c0d036875f249798b75382b73f382bd2ed229372547a7b4ef05462ed08",
+   "16672235f1594bde2ddd79167b336bcc7482cf934d50fed4414ac6a107ab4766",
    "index.edn"
-   "e0a75f10513bce7a9d4dfb68a1bbd114bd17f9e7cb791a5a8f95176b3ff3523a"}},
+   "763e116ac9f632ad0d84c3dcd8517dccb89d69d6346c3a8bf36805815d8e6e97"}},
  :resource/root
  "managed:prf-host/0c0134c4b34f121c8b2201657270198425f89f28",
  :fixture/identities
@@ -25,10 +25,10 @@
   "maven:metosin/malli/0.17.0/malli-0.17.0.jar"
   "maven:org/clojure/clojure/1.12.0/clojure-1.12.0.jar"
   "maven:org/clojure/data.json/2.4.0/data.json-2.4.0.jar"
-  "managed:prf-host-runtime/v1/0c0134c4b34f121c8b2201657270198425f89f28/src"
-  "managed:prf-host-runtime/v1/0c0134c4b34f121c8b2201657270198425f89f28/pro_rata_contract_src"
-  "managed:prf-host-runtime/v1/0c0134c4b34f121c8b2201657270198425f89f28/resources"
-  "managed:prf-host-runtime/v1/0c0134c4b34f121c8b2201657270198425f89f28/protocols_src"
+  "managed:prf-host-runtime/v2/0c0134c4b34f121c8b2201657270198425f89f28/src"
+  "managed:prf-host-runtime/v2/0c0134c4b34f121c8b2201657270198425f89f28/pro_rata_contract_src"
+  "managed:prf-host-runtime/v2/0c0134c4b34f121c8b2201657270198425f89f28/resources"
+  "managed:prf-host-runtime/v2/0c0134c4b34f121c8b2201657270198425f89f28/protocols_src"
   "maven:babashka/fs/0.5.27/fs-0.5.27.jar"
   "maven:babashka/process/0.4.16/process-0.4.16.jar"
   "maven:borkdude/edamame/1.4.28/edamame-1.4.28.jar"
@@ -63,7 +63,7 @@
   "maven:org/postgresql/postgresql/42.7.2/postgresql-42.7.2.jar"
   "maven:org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar"
   "maven:org/slf4j/slf4j-simple/1.7.36/slf4j-simple-1.7.36.jar"
-  "managed:prf-host-runtime/v1/0c0134c4b34f121c8b2201657270198425f89f28/packages/accounting-reductions/clj/src"
+  "managed:prf-host-runtime/v2/0c0134c4b34f121c8b2201657270198425f89f28/packages/accounting-reductions/clj/src"
   "gitlibs:prf/canonical/5e2b520feca812b049ba397b7b3681963c66a48c/clj/src"
   "gitlibs:prf/pro-rata-allocation/48e0b362748cd39d09994a8aa1496c668199aa74/clj/src"
   "maven:scicloj/tablecloth/7.029.2/tablecloth-7.029.2.jar"
@@ -137,7 +137,7 @@
   "maven:org/clojure/tools.analyzer/1.2.0/tools.analyzer-1.2.0.jar"
   "maven:org/clojure/core.cache/1.1.234/core.cache-1.1.234.jar"
   "maven:org/clojure/data.priority-map/1.2.0/data.priority-map-1.2.0.jar"],
- :source/revision "905a5ab0ec3c11df76f733452e4531a15a475f2b",
+ :source/revision "2c3c2a47389987b1f43d89c491225a05a98866d4",
  :resource/root-source-revision
  "0c0134c4b34f121c8b2201657270198425f89f28",
  :namespace-check nil,
