@@ -459,6 +459,20 @@
                      :question "Is the claim actually established?"
                      :deeper-id :researcher-interaction-topology}}
 
+  {:id             :reachability-and-ratification
+   :path           "notebooks/reachability_and_ratification.clj"
+   :title          "Reachability and Ratification — What Is Connected, and What Was Adopted?"
+   :summary        "Builds a local signed evidence-to-subject example, uses PRF's evidence-DAG reachability queries, and separately replays reviewer acceptance and ratifier adoption of the exact same subject."
+   :categories     [:evidence-artifacts :governance :replay-determinism]
+   :audience       [:researcher :reviewer :auditor :developer]
+   :status         :experimental
+   :risk           :medium
+   :protocol-areas [:evidence :governance]
+   :tags           ["reachability" "ratification" "evidence-dag" "subject-decisions" "signature"]
+   :presentation   {:theme :evidence-reproducibility :kind :analysis
+                    :audience-level :intermediate
+                    :question "Does evidence reach the ratified subject, or is it only present in the record?"}}
+
   {:id             :resubmission-chain
    :path           "notebooks/resubmission_chain.clj"
    :title          "The Chain Decides — current-head & Resubmission Admission"

@@ -60,6 +60,7 @@
   :security-validation-notebook :prf-hosted,
   :reproduction-comparability :prf-hosted,
   :research-resolution :prf-hosted,
+  :reachability-and-ratification :prf-hosted,
   :ef-demo-dispute-refund :prf-hosted,
   :demo-adversarial-escalation :prf-hosted,
   :appealed-escrow-walkthrough :prf-hosted,
