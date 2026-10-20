@@ -17,8 +17,20 @@ independently qualified; consult the notebook's recorded validation and scope.
 
 - `notebooks/`: executable Clerk notebook sources and their local configuration.
 - `src/notebooks/serve.clj`: Clerk server entry point.
+- `src/prf/notebooks/`: runner plus notebook build, lint, visibility, and host-load checks.
 - `data/notebooks.edn`: notebook registry consumed by the index.
 - `docs/notebooks/`: authoring, style, and export guidance.
+- `test/prf/notebooks/`: runner and pinned notebook-inventory tests.
+
+## PRF integration checks
+
+PRF keeps its `bb` task names as consumer entry points. Notebook build, lint,
+visibility, and host-load check implementations live in this repository and
+are loaded through the pinned notebook dependency. The host-load check runs
+from a PRF checkout because it tests imports against PRF simulation namespaces
+and the `:notebooks:with-sew` classpath. PRF-owned namespace inspection, run
+focus, registry-to-source reference validation, and site screenshot publication
+remain in PRF.
 
 ## Runtime
 
