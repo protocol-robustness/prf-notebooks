@@ -5,10 +5,10 @@
   :markers-found? true,
   :canonical/example-root nil,
   :sha256
-  {"index.edn"
-   "5e8329be16a0bbe1ff613cdd683a42ac7ce7dac6ac37efd8eb59aae449527e98",
-   "index.html"
-   "90951a9f6471eca26f58dfecb32ff14d0b67e35b96525e7656c469803338c426"}},
+  {"index.html"
+   "90951a9f6471eca26f58dfecb32ff14d0b67e35b96525e7656c469803338c426",
+   "index.edn"
+   "5e8329be16a0bbe1ff613cdd683a42ac7ce7dac6ac37efd8eb59aae449527e98"}},
  :resource/root "repo:",
  :fixture/identities nil,
  :dependency/classpath
@@ -59,7 +59,7 @@
   "maven:org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar"
   "maven:com/taoensso/truss/1.11.0/truss-1.11.0.jar"
   "maven:org/nibor/autolink/autolink/0.11.0/autolink-0.11.0.jar"],
- :source/revision "4261237d38d3dd0556de20d7508a5c4eb727c7d4",
+ :source/revision "c191b65b6e67f084f90c7c9b2b49d1c6eec488b9",
  :resource/root-source-revision nil,
  :namespace-check nil,
  :notebook/class :standalone,

@@ -6,10 +6,10 @@
   :markers-found? true,
   :canonical/example-root nil,
   :sha256
-  {"index.edn"
-   "8c4a0b8edff7fc93bbec853406ccc047f0bf3dc36816052c5f8e9fcc9ba0ce94",
-   "index.html"
-   "7c26e96709f32ffd8bfb9bd0a96cf1c33a724d0322dd1bfec06fb6017f750e2e"}},
+  {"index.html"
+   "7c26e96709f32ffd8bfb9bd0a96cf1c33a724d0322dd1bfec06fb6017f750e2e",
+   "index.edn"
+   "c9d46fa16acbc18c7416fe3eaa9607d742dd3169b602f71c05fde10babb5288c"}},
  :resource/root
  "managed:prf-host/0c0134c4b34f121c8b2201657270198425f89f28",
  :fixture/identities
@@ -141,7 +141,7 @@
   "maven:org/nibor/autolink/autolink/0.11.0/autolink-0.11.0.jar"
   "maven:org/clojure/core.cache/1.1.234/core.cache-1.1.234.jar"
   "maven:org/clojure/data.priority-map/1.2.0/data.priority-map-1.2.0.jar"],
- :source/revision "4261237d38d3dd0556de20d7508a5c4eb727c7d4",
+ :source/revision "c191b65b6e67f084f90c7c9b2b49d1c6eec488b9",
  :resource/root-source-revision
  "0c0134c4b34f121c8b2201657270198425f89f28",
  :namespace-check nil,
