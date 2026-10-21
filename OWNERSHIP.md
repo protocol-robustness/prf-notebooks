@@ -14,7 +14,7 @@
 
 The notebook sources declare direct library dependencies in deps.edn and import PRF-owned resolver-sim.* namespaces where classified as prf-hosted. The runner verifies the opt-in PRF Git alias against the source pin in data/notebook-runtime.edn, prepares that revision in a managed cache, and sets its root explicitly for relative resource reads. It constructs a host classpath from the pinned source, protocol, resource, and contract directories without adding the host repository root, avoiding duplicate notebook sources. Neither host implementations nor datasets are copied into this repository.
 
-The PRF integration workspace has not yet been changed to consume this
-repository. Migration must pin an immutable Git revision, update Clerk and
-Babashka paths that currently assume local `notebooks/`, and keep all
-scenario/result ownership in the PRF host.
+The PRF integration workspace has not yet been migrated to consume notebook
+sources from this repository. Its existing `bb notebook` workflow remains
+separate; any integration should pin an immutable Git revision, update its
+Clerk and Babashka paths, and keep scenario/result ownership in the PRF host.
