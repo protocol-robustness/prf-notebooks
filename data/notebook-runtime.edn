@@ -22,7 +22,8 @@
  {:portable-canonical-package
   "0937f59db7f2eb1089af353ac0b66fda237aaecbfc60eb6cd39caed8d296629b"},
  :notebooks
- {:not-admitted :prf-hosted,
+ {:read-only-reachability :prf-hosted,
+  :not-admitted :prf-hosted,
   :report :prf-hosted,
   :state-after-assurance-workbench :prf-hosted,
   :equilibrium-artifact :prf-hosted,

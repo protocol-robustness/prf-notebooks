@@ -30,6 +30,7 @@ Key workbenches include:
 | `notebooks/workbench_v2.clj` | Adversarial validation workbench (v2) — generalized scenario exploration | Engineers, security researchers |
 | `notebooks/xtdb_temporal_explorer.clj` | XTDB Temporal Explorer — bitemporal “effective then” vs “known then” queries, immutable correction history, replay failure archaeology, explicit-scope execution convergence | Engineers, operators, adopters |
 | `notebooks/reachability_and_ratification.clj` | Executable example of evidence reachability and distinct authenticated reviewer acceptance / ratifier adoption | Researchers, reviewers, auditors |
+| `notebooks/read_only_reachability.clj` | Introductory, in-memory graph queries: declared paths, shortest paths, disconnected nodes, dangling edges, and cycles | New PRF users, researchers, reviewers |
 
 ---
 

@@ -50,6 +50,7 @@
             ["Demo: Changed Result"    "notebooks/demo_not_admitted"               "🔁"]
             ["Demo: Reorder"           "notebooks/demo_reorder_chain"              "🔀"]
             ["Resubmission Chain"      "notebooks/resubmission_chain"              "⛓️"]
+            ["Read-only Reachability" "notebooks/read_only_reachability" "🧭"]
             ["Reachability & Ratification" "notebooks/reachability_and_ratification" "🔗"]
             ["Allocation Activation"   "notebooks/allocation_activation"           "✅"]
             ["Authorization Chain"      "notebooks/authorization_chain"            "🔗"]
@@ -64,7 +65,7 @@
        (str icon " " label)])]]
 
   ;; recently added section
-  (let [recent-ids [:reachability-and-ratification :verification-overview :resubmission-chain :canonical-cancellation
+  (let [recent-ids [:read-only-reachability :reachability-and-ratification :verification-overview :resubmission-chain :canonical-cancellation
                     :not-admitted :demo-not-admitted :demo-reorder-chain
                     :clean-room-not-admitted :canonical-framing
                     :evaluate-pro-rata-allocation :pro-rata-allocation-result

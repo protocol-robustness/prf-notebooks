@@ -5,7 +5,17 @@ another: graph reachability, authenticated content adoption, and a shared
 researcher network. The examples use APIs that exist today, then identify the
 work needed to make the graph itself a network-published object.
 
-## Start with the executable example
+## Start with the executable examples
+
+For the introductory, read-only graph exercise, run:
+
+```bash
+bin/prf-notebooks run read-only-reachability --with-prf-host
+```
+
+It asks path and structural questions over a fixed in-memory DAG. It does not
+persist nodes or establish authorship, policy approval, or network currentness.
+The larger example below then adds authenticated content adoption.
 
 From the `prf-notebooks` checkout, evaluate the current example:
 
