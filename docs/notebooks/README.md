@@ -14,6 +14,11 @@ rather than status indicators alone.
 See `data/notebooks.edn` for the full registry with descriptions, maturity
 levels, and per-notebook notes.
 
+For an instructional sequence covering DAG reachability, authenticated
+ratification, content-addressed evidence nodes, and the boundary between local
+replay and a replicated researcher network, see the
+[Research Network DAG learning path](research-network-dag-learning-path.md).
+
 Key workbenches include:
 
 | File | Purpose | Audience |
@@ -24,6 +29,7 @@ Key workbenches include:
 | `notebooks/game_theory_artifact.clj` | Game theory — validation story with equilibrium analysis | Protocol researchers |
 | `notebooks/workbench_v2.clj` | Adversarial validation workbench (v2) — generalized scenario exploration | Engineers, security researchers |
 | `notebooks/xtdb_temporal_explorer.clj` | XTDB Temporal Explorer — bitemporal “effective then” vs “known then” queries, immutable correction history, replay failure archaeology, explicit-scope execution convergence | Engineers, operators, adopters |
+| `notebooks/reachability_and_ratification.clj` | Executable example of evidence reachability and distinct authenticated reviewer acceptance / ratifier adoption | Researchers, reviewers, auditors |
 
 ---
 

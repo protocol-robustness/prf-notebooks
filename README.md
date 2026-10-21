@@ -20,6 +20,10 @@ independently qualified; consult the notebook's recorded validation and scope.
 - `data/notebooks.edn`: notebook registry consumed by the index.
 - `docs/notebooks/`: authoring, style, and export guidance.
 
+Start with the [research-network DAG learning path](docs/notebooks/research-network-dag-learning-path.md)
+for examples that distinguish graph reachability, authenticated ratification,
+and the additional pieces needed for network-published evidence.
+
 ## Runtime
 
 The local Clerk server requires Java 17 or newer and the Clojure CLI. The first
