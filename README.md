@@ -52,9 +52,10 @@ If port 7777 is already in use, choose another local port:
 
     PRF_NOTEBOOK_PORT=7779 PRF_NOTEBOOK_API_PORT=7780 clojure -M:prf-host:serve
 
-This starts a local development server for reviewing executable notebooks. It
-is not an authenticated or production hosting service; do not expose it to an
-untrusted network.
+This command starts a local Clerk process; it does not publish the notebooks.
+The public PRF website serves Clerk through infrastructure-managed services.
+That deployment is configured separately in the `infra` repository and must
+pin this repository's immutable revision before it can serve these sources.
 
 The registry classifies every entry as standalone, package-dependent, or prf-hosted. Standalone dependency resolution is an explicit setup --standalone step. Package and PRF host options are explicit opt-ins; if a managed checkout is missing, that selected command prepares it at the locked revision before evaluation. setup --packages, setup --prf-host, and setup --all prepare sources and resolve dependencies ahead of evaluation.
 

@@ -51,7 +51,7 @@
     (log/info! "notebook/server-starting" {:port port})
     (println (str "Starting Clerk notebook server on http://localhost:" port "/notebooks/xtdr_overview.clj"))
     (clerk/serve! {:watch-paths ["src" "data" "protocols_src" "notebooks"]
-                   :browse true
+                   :browse false
                    :port port
                    :render-nrepl {:port nrepl-port}})
     ;; Pre-evaluate all notebooks so they are reachable by URL without a file-change trigger.
