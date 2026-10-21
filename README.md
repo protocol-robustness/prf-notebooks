@@ -33,9 +33,14 @@ bin/prf-notebooks is the setup and evaluation entry point. It works when invoked
     bin/prf-notebooks run portable-canonical-package --with-packages
     bin/prf-notebooks run report --with-prf-host
 
-`bin/prf-notebooks` does not start a Clerk server. The `src/notebooks/serve.clj`
-entry point is invoked by `bb notebook` from the PRF integration checkout, where it
-uses the pinned host classpath and fixture resources.
+Start the repository-owned Clerk server from this checkout with the pinned PRF
+implementation on its classpath:
+
+    clojure -M:prf-host:serve
+
+Then open <http://localhost:7777/notebooks/reachability_and_ratification.clj>.
+The server uses this repository's notebook sources and index; PRF is a pinned
+dependency that supplies the implementation namespaces and fixture resources.
 
 The registry classifies every entry as standalone, package-dependent, or prf-hosted. Standalone dependency resolution is an explicit setup --standalone step. Package and PRF host options are explicit opt-ins; if a managed checkout is missing, that selected command prepares it at the locked revision before evaluation. setup --packages, setup --prf-host, and setup --all prepare sources and resolve dependencies ahead of evaluation.
 

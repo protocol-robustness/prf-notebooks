@@ -140,7 +140,7 @@
   "maven:org/nibor/autolink/autolink/0.11.0/autolink-0.11.0.jar"
   "maven:org/clojure/core.cache/1.1.234/core.cache-1.1.234.jar"
   "maven:org/clojure/data.priority-map/1.2.0/data.priority-map-1.2.0.jar"],
- :source/revision "10a81790037103356f0ea31119c4ca7f1aeddc69",
+ :source/revision "087ed8cefc3b025e824fe914bed44ebcb1324928",
  :resource/root-source-revision
  "0c0134c4b34f121c8b2201657270198425f89f28",
  :namespace-check nil,
