@@ -34,6 +34,7 @@
             [clojure.string :as str]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.data.json :as json]
             [resolver-sim.research.derived-coordinate :as derived]
             [resolver-sim.benchmark.research-command :as rc]
             [resolver-sim.benchmark.researcher-position :as rp]
@@ -241,7 +242,9 @@
 ;; A conclusion is an "X, **therefore** Y" artifact: what was established, the
 ;; inference, what follows, and — critically — what was *not* concluded.
 ;; Conclusions must not overreach: a finding within one parameter domain must
-;; not be presented as universal.
+;; not be presented as universal. The fixture below is an artifact-shape
+;; illustration. Its declared `:established` status is not method verification
+;; and is not evidence that the example claim is actually established.
 
 ^{:nextjournal.clerk/visibility {:code :hide :result :hide}}
 (def conclusion
@@ -312,10 +315,11 @@
                 (:rationale (rp/find-target p :conclusion :claim/liquidity-fair))])
              claim-positions)})
 
-;; ### Collective conclusion
+;; ### Descriptive collective summary
 ;;
-;; Two researchers support the claim; one challenges it. The collective view is
-;; **QUALIFIED** — supported by a majority but contested — not "established."
+;; Two researchers support the claim; one challenges it. This hand-counted
+;; **descriptive summary** is qualified and contested. It is not policy quorum,
+;; verified claim support, or ratification authority.
 
 ^{:nextjournal.clerk/visibility {:code :hide :result :hide}}
 (def collective-status
@@ -409,6 +413,101 @@
              (sort-by key (:checks aggregate)))})
 
 ;; ---
+;; ## Stage 5 — Research Resolution from the researcher API
+;;
+;; The previous stages are local illustrations. This optional read-only
+;; integration loads the fixture-backed PRF API workspace and asks for an
+;; approval intent. Preparing an intent does not submit a contribution: a
+;; researcher must inspect and sign the exact decision fields with their own
+;; signer before submission. The API's claim assessment remains independent
+;; from its policy ratification result.
+;;
+;; Start the local API with `examples/research-ratification-demo.edn` from the
+;; PRF repository. Set `PRF_RESEARCH_RATIFICATION_API` to its base URL and
+;; `PRF_RESEARCH_RATIFICATION_TARGET_ROOT` to the target root printed at
+;; startup. The optional fixture token enables intent preparation.
+
+(defn- api-json [method url token body]
+  (let [builder (cond-> (java.net.http.HttpRequest/newBuilder (java.net.URI/create url))
+                  true (.timeout (java.time.Duration/ofSeconds 10))
+                  true (.header "Accept" "application/json")
+                  token (.header "Authorization" (str "Bearer " token))
+                  body (.header "Content-Type" "application/json"))
+        publisher (if body
+                    (java.net.http.HttpRequest$BodyPublishers/ofString (json/write-str body))
+                    (java.net.http.HttpRequest$BodyPublishers/noBody))
+        request (-> builder (.method method publisher) .build)
+        response (.send (java.net.http.HttpClient/newHttpClient)
+                        request
+                        (java.net.http.HttpResponse$BodyHandlers/ofString))]
+    (when-not (<= 200 (.statusCode response) 299)
+      (throw (ex-info "Research Resolution API request failed"
+                      {:status (.statusCode response) :body (.body response)})))
+    (json/read-str (.body response) :key-fn keyword)))
+
+(defn fetch-resolution-workspace [base-url target-root]
+  (api-json "GET" (str base-url "/v1/targets/" target-root) nil nil))
+
+(defn prepare-resolution-intent [base-url target-root bearer-token]
+  (api-json "POST" (str base-url "/v1/targets/" target-root
+                           "/contribution-intents")
+            bearer-token {"kind" "approve"}))
+
+^{:nextjournal.clerk/visibility {:code :hide :result :hide}}
+(def resolution-api-config
+  {:base-url (System/getenv "PRF_RESEARCH_RATIFICATION_API")
+   :target-root (System/getenv "PRF_RESEARCH_RATIFICATION_TARGET_ROOT")
+   :bearer-token (System/getenv "PRF_RESEARCH_RATIFICATION_TOKEN")})
+
+(def live-resolution-workspace
+  (when (and (seq (:base-url resolution-api-config))
+             (seq (:target-root resolution-api-config)))
+    (fetch-resolution-workspace (:base-url resolution-api-config)
+                                (:target-root resolution-api-config))))
+
+(def live-approval-intent
+  (when (and live-resolution-workspace
+             (seq (:bearer-token resolution-api-config)))
+    (prepare-resolution-intent (:base-url resolution-api-config)
+                               (:target-root resolution-api-config)
+                               (:bearer-token resolution-api-config))))
+
+(def live-resolution-dimensions
+  (when live-resolution-workspace
+    (let [assessment (:claimAssessment live-resolution-workspace)
+          ratification (:ratification live-resolution-workspace)]
+      {:claim-status (:status assessment)
+       :method-verification (:methodVerification assessment)
+       :ratification-status (:status ratification)
+       :policy-approval-status (:policyApprovalStatus live-resolution-workspace)
+       :operational-authority (:operationalAuthority ratification)
+       :assessment-source (:assessmentSource assessment)})))
+
+(if live-resolution-workspace
+  (clerk/table
+   {:head ["Claim assessment" "Method verification" "Ratification"
+           "Policy approval" "Operational authority" "Assessment source"]
+    :rows [[(name (:claim-status live-resolution-dimensions))
+            (name (:method-verification live-resolution-dimensions))
+            (name (:ratification-status live-resolution-dimensions))
+            (name (:policy-approval-status live-resolution-dimensions))
+            (str (:operational-authority live-resolution-dimensions))
+            (name (:assessment-source live-resolution-dimensions))]]})
+  (clerk/html
+   [:div {:style {:border "1px solid #64748b" :borderRadius "8px"
+                  :padding "12px" :fontFamily "monospace"}}
+    "Live API not configured. Set PRF_RESEARCH_RATIFICATION_API and "
+    "PRF_RESEARCH_RATIFICATION_TARGET_ROOT to load the demo workspace."]))
+
+(when live-approval-intent
+  (clerk/table
+   {:head ["Prepared approval intent (not signed or submitted)"]
+    :rows [[(pr-str live-approval-intent)]]}))
+
+;; The demo fixture intentionally returns `not-established` with method
+;; verification `unavailable`. Even if policy ratification becomes `ratified`,
+;; that does not change the analytical assessment or authorize an operation.
+
 ;; ## Deeper inspection
 ;;
 ;; This notebook stops at the proof boundary: it shows that a consistent
