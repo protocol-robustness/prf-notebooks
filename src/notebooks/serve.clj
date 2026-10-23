@@ -75,6 +75,7 @@
     (show-notebook! root "demo_not_admitted.clj")
     (show-notebook! root "demo_reorder_chain.clj")
     (show-notebook! root "demo_short_circuit.clj")
+    (show-notebook! root "network_checkpoint_head_observation.clj")
     (show-notebook! root "reachability_and_ratification.clj")
 
     ;; Index is shown last — it becomes the default landing page.

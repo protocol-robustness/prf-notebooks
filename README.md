@@ -49,6 +49,8 @@ Run the command from the repository root, then open
 <http://localhost:7777/notebooks/index.clj>, the
 [Read-only Reachability notebook](http://localhost:7777/notebooks/read_only_reachability.clj),
 or the [Reachability and Ratification notebook](http://localhost:7777/notebooks/reachability_and_ratification.clj).
+For a signed checkpoint-head conflict walkthrough, open
+<http://localhost:7777/notebooks/network_checkpoint_head_observation.clj>.
 The server and notebook sources come from this repository; the PRF dependency
 provides implementation namespaces and fixture resources at the revision pinned
 in `deps.edn`.

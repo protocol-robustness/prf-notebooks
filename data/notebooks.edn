@@ -488,6 +488,20 @@
                     :audience-level :intermediate
                     :question "Does evidence reach the ratified subject, or is it only present in the record?"}}
 
+  {:id             :network-checkpoint-head-observation
+   :path           "notebooks/network_checkpoint_head_observation.clj"
+   :title          "Network Checkpoint Walkthrough — Observe a Conflicting Head"
+   :summary        "Runs the existing local checkpoint head-conflict exercise, then inspects its two source observations, reconstructed branch certificates, verifier outcomes, source revision and evidence-bundle limits."
+   :categories     [:evidence-artifacts :provenance]
+   :audience       [:researcher :reviewer :developer :auditor]
+   :status         :experimental
+   :risk           :medium
+   :protocol-areas [:evidence :network :checkpoint]
+   :tags           ["network" "checkpoint" "fork" "head-observation" "forensics"]
+   :presentation   {:theme :evidence-reproducibility :kind :demo
+                    :audience-level :intermediate
+                    :question "What does a local verifier do when two signed sources report conflicting certified heads?"}}
+
   {:id             :resubmission-chain
    :path           "notebooks/resubmission_chain.clj"
    :title          "The Chain Decides — current-head & Resubmission Admission"

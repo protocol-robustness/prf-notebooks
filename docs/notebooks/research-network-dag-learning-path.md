@@ -27,6 +27,13 @@ Or start the local Clerk server and open
 `/notebooks/reachability_and_ratification.clj` as described in the root
 [README](../../README.md).
 
+For a concrete checkpoint-network exercise, open the
+[Network Checkpoint Walkthrough](../../notebooks/network_checkpoint_head_observation.clj).
+It runs the existing `prf-network-dag-learning` head-conflict demo, then inspects
+its generated signed observations, reconstructed branch certificates and
+conflict result. It requires a local PRF checkout exposing the checkpoint API;
+the notebook documents the exact command and evidence-file handoff.
+
 The notebook creates content roots for evidence, a research basis, policy,
 acceptance, and ratification. It asks whether an explicit directed path links
 the evidence to the ratification. It then separately reconstructs and verifies
