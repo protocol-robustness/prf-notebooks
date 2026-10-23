@@ -16,8 +16,7 @@
         route-root (.resolve cwd "notebooks")
         target (.toRealPath root (make-array LinkOption 0))]
     (if (Files/exists route-root (into-array LinkOption [LinkOption/NOFOLLOW_LINKS]))
-      (if (and (Files/isSymbolicLink route-root)
-               (= target (.toRealPath route-root (make-array LinkOption 0))))
+      (if (= target (.toRealPath route-root (make-array LinkOption 0)))
         false
         (throw (ex-info "Cannot expose extracted notebooks at ./notebooks: path already exists"
                         {:path (str route-root) :source (str target)})))
@@ -35,7 +34,13 @@
   (let [path (.resolve root filename)
         route-path (str (.resolve (Paths/get "notebooks" (make-array String 0)) filename))]
     (if (.exists (.toFile path))
-      (clerk/show! route-path)
+      (try
+        (clerk/show! route-path)
+        (catch Exception error
+          ;; One legacy notebook may depend on a host feature absent from the
+          ;; pinned PRF revision. Keep the server available for other pages.
+          (log/warn! "notebook/server-evaluation-failed"
+                     {:path route-path :error (.getMessage error)})))
       (log/warn! "notebook/server-skipping-missing" {:path (str path)}))))
 
 (defn -main []
@@ -46,7 +51,7 @@
     (log/info! "notebook/server-starting" {:port port})
     (println (str "Starting Clerk notebook server on http://localhost:" port "/notebooks/xtdr_overview.clj"))
     (clerk/serve! {:watch-paths ["src" "data" "protocols_src" "notebooks"]
-                   :browse true
+                   :browse false
                    :port port
                    :render-nrepl {:port nrepl-port}})
     ;; Pre-evaluate all notebooks so they are reachable by URL without a file-change trigger.
@@ -70,6 +75,8 @@
     (show-notebook! root "demo_not_admitted.clj")
     (show-notebook! root "demo_reorder_chain.clj")
     (show-notebook! root "demo_short_circuit.clj")
+    (show-notebook! root "network_checkpoint_head_observation.clj")
+    (show-notebook! root "reachability_and_ratification.clj")
 
     ;; Index is shown last — it becomes the default landing page.
     (show-notebook! root "index.clj")))

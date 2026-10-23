@@ -459,6 +459,49 @@
                      :question "Is the claim actually established?"
                      :deeper-id :researcher-interaction-topology}}
 
+  {:id             :read-only-reachability
+   :path           "notebooks/read_only_reachability.clj"
+   :title          "Read-only Reachability — What Can This DAG Tell Us?"
+   :summary        "Builds a small in-memory evidence DAG and queries declared paths, disconnected nodes, shortest paths, dangling edges, and cycles without persisting or authenticating artifacts."
+   :categories     [:evidence-artifacts]
+   :audience       [:researcher :reviewer :developer :grant-reviewer]
+   :status         :verified
+   :risk           :informational
+   :protocol-areas [:evidence]
+   :tags           ["reachability" "evidence-dag" "read-only" "graph-query"]
+   :presentation   {:theme :evidence-reproducibility :kind :demo
+                    :audience-level :intro
+                    :question "Which paths are declared in this graph, and what does that not prove?"
+                    :deeper-id :reachability-and-ratification}}
+
+  {:id             :reachability-and-ratification
+   :path           "notebooks/reachability_and_ratification.clj"
+   :title          "Reachability and Ratification — What Is Connected, and What Was Adopted?"
+   :summary        "Builds a local signed evidence-to-subject example, uses PRF's evidence-DAG reachability queries, and separately replays reviewer acceptance and ratifier adoption of the exact same subject."
+   :categories     [:evidence-artifacts :governance :replay-determinism]
+   :audience       [:researcher :reviewer :auditor :developer]
+   :status         :experimental
+   :risk           :medium
+   :protocol-areas [:evidence :governance]
+   :tags           ["reachability" "ratification" "evidence-dag" "subject-decisions" "signature"]
+   :presentation   {:theme :evidence-reproducibility :kind :analysis
+                    :audience-level :intermediate
+                    :question "Does evidence reach the ratified subject, or is it only present in the record?"}}
+
+  {:id             :network-checkpoint-head-observation
+   :path           "notebooks/network_checkpoint_head_observation.clj"
+   :title          "Network Checkpoint Walkthrough — Observe a Conflicting Head"
+   :summary        "Runs the existing local checkpoint head-conflict exercise, then inspects its two source observations, reconstructed branch certificates, verifier outcomes, source revision and evidence-bundle limits."
+   :categories     [:evidence-artifacts :provenance]
+   :audience       [:researcher :reviewer :developer :auditor]
+   :status         :experimental
+   :risk           :medium
+   :protocol-areas [:evidence :network :checkpoint]
+   :tags           ["network" "checkpoint" "fork" "head-observation" "forensics"]
+   :presentation   {:theme :evidence-reproducibility :kind :demo
+                    :audience-level :intermediate
+                    :question "What does a local verifier do when two signed sources report conflicting certified heads?"}}
+
   {:id             :resubmission-chain
    :path           "notebooks/resubmission_chain.clj"
    :title          "The Chain Decides — current-head & Resubmission Admission"
