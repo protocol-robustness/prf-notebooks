@@ -123,6 +123,20 @@
     :presentation   {:theme :evidence-reproducibility :kind :report
                      :audience-level :intermediate}}
 
+   {:id             :concept-configuration
+    :path           "notebooks/concept_configuration.clj"
+    :title          "Concept Configuration: Add and Resolve Concepts"
+    :summary        "Educational walkthrough of PRF's concept registry: inspect a real definition, follow benchmark report resolution, and learn how to add and validate a stakeholder-facing concept without changing protocol behavior."
+    :categories     [:tooling :evidence-artifacts]
+    :audience       [:developer :researcher :protocol-designer]
+    :status         :experimental
+    :risk           :informational
+    :protocol-areas [:concepts :benchmark]
+    :tags           ["concepts" "registry" "configuration" "education" "benchmark-report"]
+    :presentation   {:theme :evidence-reproducibility :kind :tool
+                     :audience-level :intro
+                     :question "How do I add a stakeholder-facing concept, and what does that change?"}}
+
    {:id             :game-theory-artifact
    :path           "notebooks/game_theory_artifact.clj"
    :title          "Game Theory — Validation Story"

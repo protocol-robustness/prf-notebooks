@@ -35,6 +35,7 @@
   :protocol-provenance :prf-hosted,
   :research-network-work-binding :prf-hosted,
   :benchmark-protocol-robustness :prf-hosted,
+  :concept-configuration :prf-hosted,
   :workbench-v2 :prf-hosted,
   :dispute-resolution :prf-hosted,
   :canonical-cancellation :prf-hosted,
