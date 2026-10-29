@@ -1,7 +1,7 @@
 # PRF Notebooks
 
 This repository owns the PRF Clerk notebook sources, notebook-only rendering
-helpers, notebook registry, and notebook authoring guidance.
+helpers, notebook registry, authoring guidance, and local Clerk server.
 
 The notebooks are views over the PRF integration workspace. They use its
 simulation namespaces and read scenario, fixture, conformance, and generated
@@ -20,9 +20,16 @@ independently qualified; consult the notebook's recorded validation and scope.
 - `data/notebooks.edn`: notebook registry consumed by the index.
 - `docs/notebooks/`: authoring, style, and export guidance.
 
+Start with the [research-network DAG learning path](docs/notebooks/research-network-dag-learning-path.md)
+for examples that distinguish graph reachability, authenticated ratification,
+and the additional pieces needed for network-published evidence.
+
 ## Runtime
 
-The runner requires Babashka and the Clojure CLI.
+The local Clerk server requires Java 17 or newer and the Clojure CLI. The first
+run fetches the pinned PRF dependency and other Maven artifacts, so it needs
+network access. Babashka is additionally required for the `bin/prf-notebooks`
+runner.
 
 bin/prf-notebooks is the setup and evaluation entry point. It works when invoked from another working directory.
 
@@ -33,9 +40,29 @@ bin/prf-notebooks is the setup and evaluation entry point. It works when invoked
     bin/prf-notebooks run portable-canonical-package --with-packages
     bin/prf-notebooks run report --with-prf-host
 
-`bin/prf-notebooks` does not start a Clerk server. The `src/notebooks/serve.clj`
-entry point is invoked by `bb notebook` from the PRF integration checkout, where it
-uses the pinned host classpath and fixture resources.
+Start the repository-owned Clerk server from this checkout with the pinned PRF
+implementation on its classpath:
+
+    clojure -M:prf-host:serve
+
+Run the command from the repository root, then open
+<http://localhost:7777/notebooks/index.clj>, the
+[Read-only Reachability notebook](http://localhost:7777/notebooks/read_only_reachability.clj),
+or the [Reachability and Ratification notebook](http://localhost:7777/notebooks/reachability_and_ratification.clj).
+For a signed checkpoint-head conflict walkthrough, open
+<http://localhost:7777/notebooks/network_checkpoint_head_observation.clj>.
+The server and notebook sources come from this repository; the PRF dependency
+provides implementation namespaces and fixture resources at the revision pinned
+in `deps.edn`.
+
+If port 7777 is already in use, choose another local port:
+
+    PRF_NOTEBOOK_PORT=7779 PRF_NOTEBOOK_API_PORT=7780 clojure -M:prf-host:serve
+
+This command starts a local Clerk process; it does not publish the notebooks.
+The public PRF website serves Clerk through infrastructure-managed services.
+That deployment is configured separately in the `infra` repository and must
+pin this repository's immutable revision before it can serve these sources.
 
 The registry classifies every entry as standalone, package-dependent, or prf-hosted. Standalone dependency resolution is an explicit setup --standalone step. Package and PRF host options are explicit opt-ins; if a managed checkout is missing, that selected command prepares it at the locked revision before evaluation. setup --packages, setup --prf-host, and setup --all prepare sources and resolve dependencies ahead of evaluation.
 
@@ -44,6 +71,11 @@ source file in this repository. Archived metadata lives under
 `:archived-notebooks` and is excluded from runnable navigation and setup.
 Runner checks are available with `PRF_NOTEBOOKS_REPO="$PWD" clojure -Srepro
 -M:test`.
+
+Before proposing source changes, validate the registry and runner:
+
+    bin/prf-notebooks list
+    PRF_NOTEBOOKS_REPO="$PWD" clojure -Srepro -M:test
 
 Sources are cached under ~/.cache/prf-notebooks, or under PRF_NOTEBOOKS_CACHE. The runner only creates and checks out directories inside this managed cache. It does not change an existing PRF checkout. Its PRF Git alias and checkout URL/revision are cross-checked against data/notebook-runtime.edn before setup or evaluation.
 
@@ -59,5 +91,6 @@ are not copied here. The projection omits PRF's older `src/notebooks/serve.clj`
 because this repository owns the server entry point. Canonical namespaces may
 never appear twice.
 
-The source snapshot is recorded in `PROVENANCE.md`. No notebook package or
-rendered site has been published from this repository.
+The source snapshot is recorded in `PROVENANCE.md`. Release qualification and
+publication status are tracked separately in `RELEASE.edn`; a passing notebook
+render is not a release qualification.

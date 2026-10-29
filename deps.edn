@@ -31,6 +31,12 @@
   {:exec-fn nextjournal.clerk/serve!
    :exec-args {:browse true :watch-paths ["src" "notebooks"]}}
 
+  ;; Run the repository-owned Clerk host with the pinned PRF implementation
+  ;; available as a dependency. This server entry point also registers the
+  ;; curated pages linked by notebooks/index.clj.
+  :serve
+  {:main-opts ["-m" "notebooks.serve"]}
+
   :build-clerk
   {:exec-fn nextjournal.clerk/build!
    :exec-args {:paths ["notebooks/report.clj"]}}}}
