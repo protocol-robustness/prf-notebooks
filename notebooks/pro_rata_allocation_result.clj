@@ -416,9 +416,9 @@
 
 (def forensic-source-files
   ["notebooks/pro_rata_allocation_result.clj"
-   "protocols_src/resolver_sim/protocols/sew/economics.clj"
-   "protocols_src/resolver_sim/protocols/sew/types.clj"
-   "protocols_src/resolver_sim/protocols/sew/evidence/slashing.clj"
+   "resolver_sim/protocols/sew/economics.clj"
+   "resolver_sim/protocols/sew/types.clj"
+   "resolver_sim/protocols/sew/evidence/slashing.clj"
    "src/resolver_sim/pro_rata/evaluation.clj"
    "src/resolver_sim/pro_rata/evidence.clj"
    "src/resolver_sim/hash/canonical.clj"
