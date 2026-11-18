@@ -360,8 +360,11 @@
     (apply str (map #(format "%02x" (bit-and 0xff %)) (.digest digest)))))
 
 (defn- jj-output [& args]
-  (let [{:keys [exit out err]} (apply shell/sh "jj" args)]
-    (if (zero? exit) (str/trim out) (str "unavailable: " (str/trim err)))))
+  (try
+    (let [{:keys [exit out err]} (apply shell/sh "jj" args)]
+      (if (zero? exit) (str/trim out) (str "unavailable: " (str/trim err))))
+    (catch java.io.IOException e
+      (str "unavailable: " (.getMessage e)))))
 
 (def forensic-source-files
   ["notebooks/yield_shortfall_partial_withdrawal_fills.clj"

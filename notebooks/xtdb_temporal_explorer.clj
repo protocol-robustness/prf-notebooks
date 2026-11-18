@@ -45,7 +45,9 @@
   (try (xtdb/->datasource) (catch Throwable _ nil)))
 
 (defn- live? []
-  (and ds (seq (ep/execution-runs-valid-at ds (java.util.Date.)))))
+  (try
+    (boolean (and ds (seq (ep/execution-runs-valid-at ds (java.util.Date.)))))
+    (catch Exception _ false)))
 
 (defn- notice [msg]
   (clerk/html
