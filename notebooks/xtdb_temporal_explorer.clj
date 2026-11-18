@@ -46,7 +46,7 @@
 
 (defn- live? []
   (try
-    (boolean (and ds (seq (ep/execution-runs-valid-at ds (java.util.Date.))))
+    (boolean (and ds (seq (ep/execution-runs-valid-at ds (java.util.Date.)))))
     (catch Exception _ false)))
 
 (defn- notice [msg]
