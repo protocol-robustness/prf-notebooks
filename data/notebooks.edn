@@ -82,6 +82,20 @@
     :presentation   {:theme :evidence-reproducibility :kind :report
                      :audience-level :intermediate}}
 
+  {:id             :use-case-mappings
+   :path           "notebooks/use_case_mappings.clj"
+   :title          "Use-Case Mappings — Stakeholder Terms to Protocol Concepts"
+   :summary        "Inspects an explicitly loaded use-case definition and shows how its roles, entities, actions, and outcomes map to protocol concepts, including declared approximations and their notes. Separates semantic mapping from execution, verification, and authority."
+   :categories     [:demos :tooling]
+   :audience       [:adopter :researcher :reviewer :developer]
+   :status         :experimental
+   :risk           :informational
+   :protocol-areas [:use-cases :evidence]
+   :tags           ["use-cases" "semantic-mapping" "stakeholder-vocabulary" "capability-boundary"]
+   :presentation   {:theme :evidence-reproducibility :kind :demo
+                    :audience-level :intro
+                    :question "What does a use-case mapping say, and what does it leave unproven?"}}
+
   {:id             :evm-dependency-provenance
    :path           "notebooks/evm_dependency_provenance.clj"
    :title          "Pinned EVM Dependency Provenance"
