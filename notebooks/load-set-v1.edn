@@ -45,7 +45,7 @@
   "notebooks/security_validation.clj"
   "notebooks/state_after_assurance_workbench.clj"
   "notebooks/telemetry.clj"
-  "notebooks/util/yield_demo.clj"
+  "notebooks/util/yield_demo_sq1.clj"
   "notebooks/verification_overview.clj"
   "notebooks/withdrawal_observatory.clj"
   "notebooks/workbench_v2.clj"
