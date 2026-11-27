@@ -45,7 +45,12 @@
   (try (xtdb/->datasource) (catch Throwable _ nil)))
 
 (defn- live? []
-  (and ds (seq (ep/execution-runs-valid-at ds (java.util.Date.)))))
+  ;; Datasource creation is lazy: it can succeed while the first request still
+  ;; fails because the XTDB server is unavailable. Treat that as the same
+  ;; offline state as a missing datasource so every panel can render its notice.
+  (try
+    (and ds (seq (ep/execution-runs-valid-at ds (java.util.Date.))))
+    (catch Throwable _ false)))
 
 (defn- notice [msg]
   (clerk/html
