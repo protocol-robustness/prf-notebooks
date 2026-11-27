@@ -14,9 +14,10 @@
              [clojure.java.shell :as shell]
              [clojure.string :as str]
              [nextjournal.clerk :as clerk]
-             [notebooks.util.yield-demo :as demo]
+             [notebooks.util.yield-demo-sq1 :as demo]
              [resolver-sim.notebook-support.common :as common])
   (:import [java.security MessageDigest]))
+
 
 (defn- kv-table
   "Convert a flat map (string keys) into a Clerk-compatible key-value table."
@@ -41,14 +42,14 @@
 ;;
 ;; **Key concepts:**
 ;; - **Fulfilled:** amount paid immediately from available liquidity
-;; - **Deferred:** amount not paid now but tracked for later recovery
+;; - **Unpaid requested right:** an opened request amount not yet paid
 ;; - **Shortfall-affected:** any withdrawal that cannot be fully fulfilled
 ;;
 ;; ---
-;; **Label:** *Illustrative model using real partial-fill engine*
-;; This notebook uses `resolver-sim.yield.partial-fill/calculate-fulfillment`
-;; (real framework code) for per-user settlement math, but the pool
-;; allocation logic is a custom proportional model for demonstration.
+;; **Classification:** synthetic sequential teaching model. It calls the
+;; framework's per-user partial-fill function but applies its own sequential
+;; pool-share rule. Results are not canonical pro-rata allocation,
+;; source-authenticated claims, live transfers, or a qualified protocol result.
 
 ;; ## 1. Scenario Setup
 ;;
@@ -61,12 +62,26 @@
    {:event :deposit :user :bob   :amount 750}
    {:event :deposit :user :cara  :amount 500}
    {:event :set-liquidity-shortfall :available-ratio 0.40}
-   {:event :withdraw-request :user :alice :requested 1000}
-   {:event :withdraw-request :user :bob   :requested 500}
-   {:event :withdraw-request :user :cara  :requested 500}])
+   {:event :withdraw-request :user :alice :right/id "alice-opening-1"
+    :request-kind :opening :requested 1000}
+   {:event :withdraw-request :user :bob :right/id "bob-opening-1"
+    :request-kind :opening :requested 500}
+   {:event :withdraw-request :user :cara :right/id "cara-opening-1"
+    :request-kind :opening :requested 500}])
 
 ^{:nextjournal.clerk/visibility {:code :hide :result :show}}
 (def result (demo/run-scenario scenario-events))
+(def accounting
+  (let [final (:final-state result)
+        rights (reduce + 0 (map :outstanding (vals (:rights final))))
+        outstanding (demo/total-outstanding final)]
+    {:deposited (:total-principal final)
+     :opening-requested (reduce + 0 (map :requested
+                                         (filter #(= :opening (:request-kind %)) (:events result))))
+     :cumulative-paid (:fulfilled-total final)
+     :unpaid-requested-rights rights
+     :unrequested-principal (- outstanding rights)
+     :outstanding-principal outstanding}))
 
 (defn- first-outcome [user]
   (first (filter #(= (:user %) user) (:outcomes result))))
@@ -82,8 +97,21 @@
            ["Available ratio (after shortfall)" "40%"]
            ["Withdrawal policy" "proportional share of pool (principal-only; this demo does not model yield)"]
            ["Shortfall model" "liquidity-only, recoverable, defer unfilled"]
-          ["Model type" "illustrative (uses real calculate-fulfillment)"]]
+          ["Model type" "synthetic, sequential teaching model"]
+          ["Canonical allocation" "not run"]]
    :row-keys [:field :value]})
+
+;; This accounting is derived from the scenario events and unique request IDs.
+(clerk/table
+  (kv-table
+    {"Deposited principal" (str (:deposited accounting) " USDC")
+     "Opening requests" (str (:opening-requested accounting) " USDC")
+     "Paid" (str (:cumulative-paid accounting) " USDC")
+     "Unpaid requested rights" (str (:unpaid-requested-rights accounting) " USDC")
+     "Unrequested principal" (str (:unrequested-principal accounting) " USDC")
+     "Outstanding principal" (str (:outstanding-principal accounting) " USDC")
+     "Conservation" "2250 = 900 paid + 1350 outstanding"
+     "Outstanding partition" "1350 = 1100 unpaid requests + 250 unrequested"}))
 
 ;; ## 2. Event Timeline
 
@@ -150,7 +178,7 @@
 (let [before (nth (:snapshots result) 4)
       after (nth (:snapshots result) 5)
       outcome (first-outcome :alice)
-      settlement (get-in result [:settlements :alice])]
+      settlement (get-in result [:settlements "alice-opening-1"])]
   (clerk/html
     [:div {:style {:background "#0f172a" :border "1px solid #f59e0b"
                    :borderRadius "8px" :padding "16px" :marginTop "16px"}}
@@ -188,7 +216,7 @@
 (let [before (nth (:snapshots result) 5)
       after (nth (:snapshots result) 6)
       outcome (first-outcome :bob)
-      settlement (get-in result [:settlements :bob])]
+      settlement (get-in result [:settlements "bob-opening-1"])]
   (clerk/html
     [:div {:style {:background "#0f172a" :border "1px solid #f59e0b"
                    :borderRadius "8px" :padding "16px" :marginTop "16px"}}
@@ -225,7 +253,7 @@
 (let [before (nth (:snapshots result) 6)
       after (last (:snapshots result))
       outcome (first-outcome :cara)
-      settlement (get-in result [:settlements :cara])]
+      settlement (get-in result [:settlements "cara-opening-1"])]
   (clerk/html
     [:div {:style {:background "#0f172a" :border "1px solid #ef4444"
                    :borderRadius "8px" :padding "16px" :marginTop "16px"}}
@@ -286,11 +314,9 @@
 ;; - **Cara:** 500 USDC requested → 200 fulfilled, 300 deferred. Partial fill.
 ;;   Cara arrives last and receives 40% of her request from the diminished pool.
 ;;
-;; **Key insight:** Each user receives a proportion of the available pool equal
-;; to their share of the remaining principal at withdrawal time:
+;; The demonstration uses this custom sequential pool-share rule:
 ;;   `user-pool-share = pool × user-principal / remaining-total-principal`
-;; Liquidity shortfall does not mean total loss — deferred amounts are tracked
-;; on unwinding positions and can be recovered if liquidity returns.
+;; Its outcomes do not establish protocol behavior, fairness, or eventual recovery.
 
 ;; ## 7. Raw EDN Appendix
 
@@ -365,7 +391,7 @@
 
 (def forensic-source-files
   ["notebooks/yield_shortfall_partial_withdrawal_fills.clj"
-   "notebooks/util/yield_demo.clj"
+   "notebooks/util/yield_demo_sq1.clj"
    "src/resolver_sim/yield/partial_fill.clj"
    "src/resolver_sim/yield/position.clj"
    "deps.edn"])
@@ -384,7 +410,7 @@
                           (map (fn [path] [path (file-sha256 path)]) forensic-source-files))
      :implementation-boundary
      {:settlement-math "resolver-sim.yield.partial-fill/calculate-fulfillment"
-      :pool-ordering "Custom sequential proportional model in notebooks/util/yield_demo.clj"
+      :pool-ordering "Custom sequential proportional model in notebooks/util/yield_demo_sq1.clj"
       :not-modeled ["on-chain transactions" "proof admission" "external request authenticity" "yield accrual"]}
      :inputs {:scenario-events scenario-events
               :withdrawal-event-count (count withdrawals)

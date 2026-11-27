@@ -12,8 +12,9 @@
    how a yield module can recover partial liquidity and settle
    previously deferred withdrawal claims."
   (:require [nextjournal.clerk :as clerk]
-             [notebooks.util.yield-demo :as demo]
+             [notebooks.util.yield-demo-sq1 :as demo]
              [resolver-sim.notebook-support.common :as common]))
+
 
 (defn- kv-table
   [m]
@@ -35,8 +36,9 @@
 ;;
 ;; **Key concepts:**
 ;; - **Partial recovery:** liquidity returns but not to 100%
-;; - **Deferred claims:** previously unfilled amounts become claimable again
-;; - **Wave 2:** a second round of withdrawals against the expanded pool
+;; - **Retry:** another attempt against the same unique unpaid request right
+;; - **New request:** a distinct right against still-unrequested principal
+;; - **Accounting:** attempts are flows; outstanding rights are unique balances
 
 ;; ## 1. Scenario Setup
 ;;
@@ -50,15 +52,19 @@
    {:event :deposit :user :cara  :amount 500}
    ;; Wave 1: shortfall at 40%
    {:event :set-liquidity-shortfall :available-ratio 0.40}
-   {:event :withdraw-request :user :alice :requested 1000}
-   {:event :withdraw-request :user :bob   :requested 500}
-   {:event :withdraw-request :user :cara  :requested 500}
+   {:event :withdraw-request :user :alice :right/id "alice-opening-1" :request-kind :opening :requested 1000}
+   {:event :withdraw-request :user :bob :right/id "bob-opening-1" :request-kind :opening :requested 500}
+   {:event :withdraw-request :user :cara :right/id "cara-opening-1" :request-kind :opening :requested 500}
    ;; Liquidity recovers to 90% — previously reserved funds become accessible
    {:event :set-liquidity-shortfall :available-ratio 0.90}
+   ;; Synthetic no-op marker: no transfer is executed or observed.
+   {:event :simulate-payment-failure :user :bob
+    :right/id "bob-opening-1" :amount 200}
    ;; Wave 2: users claim more of their remaining principal
-   {:event :withdraw-request :user :alice :requested 600}
-   {:event :withdraw-request :user :bob   :requested 450}
-   {:event :withdraw-request :user :cara  :requested 300}])
+   {:event :withdraw-request :wave 2 :user :alice :right/id "alice-opening-1" :request-kind :retry :requested 600}
+   {:event :withdraw-request :wave 2 :user :bob :right/id "bob-opening-1" :request-kind :retry :requested 200}
+   {:event :withdraw-request :wave 2 :user :bob :right/id "bob-new-1" :request-kind :new :requested 250}
+   {:event :withdraw-request :wave 2 :user :cara :right/id "cara-opening-1" :request-kind :retry :requested 300}])
 
 ^{:nextjournal.clerk/visibility {:code :hide :result :show}}
 (def result (demo/run-scenario scenario-events))
@@ -177,7 +183,7 @@
       (:available-liquidity after) " USDC (90% of total, minus already-fulfilled amounts). "
       "Positions re-activated. Deferred claims can now be retried."]]))
 
-;; ### T8–T10: Second Withdrawal Wave
+;; ### T8–T11: Recovery Attempts
 
 ^{:nextjournal.clerk/visibility {:code :hide :result :show}}
 (let [snap (last (:snapshots result))
@@ -187,8 +193,7 @@
                    :borderRadius "8px" :padding "16px" :marginTop "16px"}}
      [:h3 {:style {:color "#f8fafc" :marginTop 0}} "Wave 2 — Users claim remaining principal"]
      [:p {:style {:color "#cbd5e1" :fontSize "14px"}}
-      "With 1,125 USDC newly available, users attempt to withdraw their remaining "
-      "principal. They still receive partial fills — the pool is not fully restored to 100%."]
+      "The recovery adds 1,125 USDC of liquidity. A synthetic failure marker first records a no-op on Bob's existing 200 right; it changes no balance and executes no transfer. Alice then retries 600 on her existing right; Bob retries 200 on that same right and separately opens a new 250 request; Cara retries 300. The sequential teaching model allocates integer payouts across attempts; the 1,125 is pool liquidity, not a promise that each request is paid in full."]
      [:div {:style {:marginTop "8px"}}
       (clerk/table (demo/withdrawal-outcomes wave2))]
      [:div {:style {:marginTop "12px" :padding "8px 12px"
@@ -211,30 +216,29 @@
         wave2 (filter #(= 2 (:wave %)) (:outcomes result))
         t1 (demo/withdrawal-outcomes wave1)
         t2 (demo/withdrawal-outcomes wave2)]
-    {:head [:wave :user :requested :fulfilled :fill-pct :deferred :status :shortfall-affected]
+    {:head [:wave :user :right-id :request-kind :requested :fulfilled :fill-pct :deferred :status :shortfall-affected]
      :rows (into (mapv #(into ["Wave 1"] %) (:rows t1))
                  (mapv #(into ["Wave 2"] %) (:rows t2)))
-     :row-keys [:wave :user :requested :fulfilled :fill-pct :deferred :status :shortfall-affected]}))
+     :row-keys [:wave :user :right-id :request-kind :requested :fulfilled :fill-pct :deferred :status :shortfall-affected]}))
 
 ;; ### Who is affected after both waves?
 
 ;;
-;; After liquidity recovery to 90%, each user tries again. The totals
-;; depend on how much pool remained after their wave-1 share was taken.
+;; After recovery the model pays Alice 500, Bob's retry 200, Bob's new request
+;; 193, and Cara's retry 232. These integer outputs sum to 1,125. The remaining
+;; unique rights are Alice 100, Bob retry 0, Bob new 57, Cara 68: 225 total.
+;; Thus 2,250 deposited = 2,025 paid + 225 outstanding. Repeated attempts do
+;; not create duplicate liabilities. The 90% scenario does not guarantee these
+;; particular allocations outside this sequential teaching adapter.
 ;;
-;; **Alice:** First wave 400, second wave — remaining depends on pool share.
+;; **Alice:** opening right 1,000; retry 600 pays 500; 100 remains.
 ;;
-;; **Bob:** First wave 300, second wave — remaining depends on pool share.
+;; **Bob:** opening right 500; retry 200 pays 200; separate new right 250 pays 193.
 ;;
-;; **Cara:** First wave 200, second wave — remaining depends on pool share.
+;; **Cara:** opening right 500; retry 300 pays 232; 68 remains.
 ;;
-;; **Key insight:** Partial liquidity recovery enables partial deferred-claim
-;; settlement. Deferred amounts shrink but are not eliminated unless liquidity
-;; returns to 100%. The module tracks each user's residual claim.
-;;
-;; **Key insight:** Partial liquidity recovery enables partial deferred-claim
-;; settlement. Deferred amounts shrink but are not eliminated unless liquidity
-;; returns to 100%. The module tracks each user's residual claim.
+;; These are outputs of the custom sequential adapter with integer rounding,
+;; not canonical allocation results or a protocol guarantee.
 
 ;; ## 6. Final Shortfall Summary
 

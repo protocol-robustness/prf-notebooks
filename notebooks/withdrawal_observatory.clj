@@ -4,7 +4,7 @@
   (:require [nextjournal.clerk :as clerk]))
 
 ;; # Withdrawal & Claimable Balance Observatory
-;; ## High-Assurance Settlement Architecture: Push vs. Pull
+;; ## Illustrative Settlement Architecture: Push vs. Pull
 
 ^{:nextjournal.clerk/visibility {:code :hide :result :show}
   :nextjournal.clerk/width :full}
@@ -26,17 +26,17 @@
   [:div.observatory-grid
    ;; Left: Push Model (Risk)
    [:div.arch-card
-    [:h3 {:style {:color "#FF9800"}} "Legacy 'Push' Model (Vulnerable)"]
+    [:h3 {:style {:color "#FF9800"}} "Push Model (interaction risks)"]
     [:div.flow-dag
      [:div.node "ESCROW"]
      [:div.line {:style {:background "#FF9800"}} ]
      [:div.node "RECIPIENT"]]
     [:p {:style {:fontSize "0.9rem" :color "#cbd5e1"}} 
-     "Autopush forces interaction, creating reentrancy vulnerabilities and gas-griefing surfaces. If the recipient contract is malicious, the protocol state is compromised during the push."]]
+     "A push flow couples settlement to recipient interaction. Depending on implementation, this can expose reentrancy or gas griefing risks; this diagram does not establish an exploit or safety result."]]
 
    ;; Right: Pull Model (Sew)
    [:div.arch-card
-    [:h3 {:style {:color "#03DAC6"}} "Sew 'Pull' Model (Hardened)"]
+    [:h3 {:style {:color "#03DAC6"}} "Pull Model (separated delivery)"]
     [:div.flow-dag
      [:div.node "ESCROW"]
      [:div.line]
@@ -44,17 +44,10 @@
      [:div.line]
      [:div.node "WITHDRAWAL"]]
     [:p {:style {:fontSize "0.9rem" :color "#cbd5e1"}} 
-     "Decouples entitlement from delivery. Funds sit in a hardened ledger, accessible only via explicit, gas-isolated withdrawal calls."]]]
+     "Separating entitlement from delivery can reduce some recipient-interaction risks. A pull design still requires correct authorization, accounting, and implementation; it is not a safety guarantee."]]]
 
   ;; Governance Constraint Matrix
   [:div.comparison-box
-   [:h3 "Architecture Safety Matrix"]
-   (clerk/vl
-    {:width 1000 :height 150 :background "transparent"
-     :data {:values [{:phase "Entitlement" :safe 100 :risk 0}
-                     {:phase "Delivery" :safe 100 :risk 0}]}
-     :mark "bar"
-     :encoding {:x {:field "phase" :type "nominal"}
-                :y {:field "safe" :type "quantitative" :scale {:domain [0 100]}}
-                :color {:field "phase" :type "nominal" :scale {:range ["#7ADDDC" "#03DAC6"]}}}})
+   [:h3 "Design considerations"]
+   [:p "This conceptual comparison has no measured safety score and does not test a deployed implementation."]
   ]])

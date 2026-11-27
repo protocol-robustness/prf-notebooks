@@ -182,7 +182,7 @@
    {:id             :withdrawal-observatory
    :path           "notebooks/withdrawal_observatory.clj"
    :title          "Withdrawal & Claimable Balance Observatory"
-   :summary        "Observable safety of withdrawal and claimable balance calculations under concurrent and adversarial conditions."
+   :summary        "Illustrative pull versus push architecture comparison; explains possible risk reduction without claiming a safety guarantee."
    :categories     [:yield-liquidity :security-validation]
    :audience       [:researcher :auditor]
    :status         :partial
@@ -335,10 +335,10 @@
   {:id             :demo-liquidity-shortfall
    :path           "notebooks/demo_liquidity_shortfall_partial_settlement.clj"
    :title          "Demo 2 — Liquidity Shortfall & Partial Settlement"
-   :summary        "Walkthrough demo: liquidity shortfall scenario with partial settlement outcome. Shows waterfall mechanics."
+   :summary        "Synthetic static stress illustration; percentages are teaching labels, not executed replay or evidence."
    :categories     [:demos :yield-liquidity]
    :audience       [:grant-reviewer :researcher]
-   :status         :verified
+   :status         :experimental
    :risk           :medium
    :protocol-areas [:accounting :yield :settlement]
    :threats        [:liquidity-shortfall]
@@ -658,10 +658,10 @@
   {:id             :partial-liquidity-recovery
    :path           "notebooks/partial_liquidity_recovery_deferred_claim.clj"
    :title          "Partial Liquidity Recovery — Deferred Claim"
-   :summary        "Yield module partial liquidity recovery and deferred-claim settlement walkthrough using the real partial-fill engine."
+   :summary        "Synthetic sequential teaching model with distinct request rights and recovery retries; not canonical allocation qualification."
    :categories     [:yield-liquidity :demos]
    :audience       [:researcher :grant-reviewer]
-   :status         :verified
+   :status         :experimental
    :risk           :medium
    :protocol-areas [:yield :accounting]
    :threats        [:liquidity-shortfall]
@@ -672,10 +672,10 @@
   {:id             :yield-shortfall-partial-withdrawal-fills
    :path           "notebooks/yield_shortfall_partial_withdrawal_fills.clj"
    :title          "Yield Shortfall — Partial Withdrawal Fills"
-   :summary        "Yield module liquidity shortfall walkthrough: what happens when deposits exceed available liquidity, with proportional partial-fill settlement."
+   :summary        "Synthetic sequential principal-only teaching model; its pool ordering is not canonical pro-rata qualification."
    :categories     [:yield-liquidity :demos]
    :audience       [:researcher :grant-reviewer]
-   :status         :verified
+   :status         :experimental
    :risk           :medium
    :protocol-areas [:yield :accounting]
    :threats        [:liquidity-shortfall]

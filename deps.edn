@@ -8,6 +8,9 @@
  {:test {:extra-paths ["test"]
          :main-opts ["-m" "prf.notebooks.test-runner"]}
 
+  :shortfall-test {:extra-paths ["test"]
+                   :main-opts ["-m" "prf.notebooks.shortfall-test-runner"]}
+
   :prf-host
   {:extra-deps
    {protocol-robustness/framework

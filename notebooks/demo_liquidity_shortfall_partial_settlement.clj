@@ -1,5 +1,5 @@
-;; # Demo 2 — Liquidity Shortfall & Partial Settlement
-;; Yield-Enabled Settlement Under Liquidity Stress (screenshot-first)
+;; # Demo 2 — Synthetic Liquidity Shortfall Stress Illustration
+;; Static teaching values only; not an executed replay, evidence packet, or protocol result.
 
 ^{:nextjournal.clerk/visibility {:code :fold :result :show}
   :nextjournal.clerk/dark-mode true}
@@ -15,7 +15,7 @@
    {:t "T5" :liq 54  :queue 36 :claim-now 61  :deferred 39}
    {:t "T6" :liq 73  :queue 19 :claim-now 79  :deferred 21}])
 
-(def counterfactual
+(def illustrative-stress
   [{:t "T0" :liq 100 :queue 8  :claim-now 100}
    {:t "T1" :liq 81  :queue 16 :claim-now 91}
    {:t "T2" :liq 67  :queue 27 :claim-now 84}
@@ -43,7 +43,7 @@
  [:div {:style {:background "#020617" :color "#e2e8f0" :padding "28px" :fontFamily "Inter, JetBrains Mono, sans-serif"}}
   [:h1 {:style {:marginTop 0 :color "#ffffff" :fontSize "40px"}} "Demo 2 — Liquidity Shortfall & Partial Settlement"]
   [:p {:style {:color "#7ADDDC" :fontWeight 800 :fontSize "18px"}}
-   "This settlement system is operating correctly. But the underlying liquidity environment has changed."]
+   "Synthetic stress illustration only. These values do not show a tested or operating settlement system."]
 
   [:div {:style {:display "grid" :gridTemplateColumns "repeat(4,1fr)" :gap "10px" :marginTop "12px"}}
    (card "Audience" "Aave / Yield" "settlement + liquidity researchers")
@@ -78,7 +78,7 @@
    [:div {:style {:marginTop "10px" :padding "8px 10px" :background "#111827" :border "1px solid #ef4444" :borderRadius "6px" :fontWeight 800 :color "#f8fafc"}}
     "Partial settlement state at stress peak: 42% immediately claimable · 58% deferred"]]
 
-  [:h2 {:style {:color "#03DAC6" :fontSize "28px" :marginTop "26px"}} "Scene 3 — Queue propagation"]
+  [:h2 {:style {:color "#03DAC6" :fontSize "28px" :marginTop "26px"}} "Scene 3 — Synthetic queue illustration"]
   [:div {:style {:background "#0f172a" :border "1px solid #004D59" :borderRadius "8px" :padding "14px"}}
    [:div {:style {:fontSize "13px" :color "#cbd5e1" :marginBottom "8px"}}
     "Cascading delays as queued withdrawals absorb settlement capacity; latency grows until liquidity recovers."]
@@ -105,33 +105,33 @@
    [:div {:style {:marginTop "10px" :fontSize "13px" :color "#fecaca" :fontWeight 700}}
     "Shortfall is explicit: 58% of requested settlement cannot be redeemed immediately and is forced into deferred queue state."]]
 
-  [:h2 {:style {:color "#03DAC6" :fontSize "28px" :marginTop "26px"}} "Scene 4 — Counterfactual replay"]
-  [:p {:style {:color "#cbd5e1"}} "Adjusted parameters: higher reserve ratio, smoother withdrawal cadence, faster liquidity recovery."]
+  [:h2 {:style {:color "#03DAC6" :fontSize "28px" :marginTop "26px"}} "Scene 4 — Static scenario comparison"]
+  [:p {:style {:color "#cbd5e1"}} "The following percentages are hand-authored teaching values, not the result of replaying adjusted parameters."]
   [:div {:style {:display "grid" :gridTemplateColumns "1fr 1fr" :gap "12px"}}
    [:div {:style {:background "#0f172a" :border "1px solid #004D59" :borderRadius "8px" :padding "12px"}}
     [:h3 {:style {:marginTop 0 :color "#f8fafc"}} "Baseline stress"]
     [:div {:style {:fontSize "13px" :color "#cbd5e1"}} "Queue peak: 58 · Claim-now floor: 42%"]]
    [:div {:style {:background "#0f172a" :border "1px solid #03DAC6" :borderRadius "8px" :padding "12px"}}
-    [:h3 {:style {:marginTop 0 :color "#f8fafc"}} "Counterfactual tuned"]
+    [:h3 {:style {:marginTop 0 :color "#f8fafc"}} "Illustrative tuned scenario"]
     [:div {:style {:fontSize "13px" :color "#cbd5e1"}} "Queue peak: 33 · Claim-now floor: 76%"]]]
 
   [:div {:style {:background "#0f172a" :border "1px solid #004D59" :borderRadius "8px" :padding "14px" :marginTop "10px"}}
    [:div {:style {:display "grid" :gridTemplateColumns "80px 1fr 140px" :gap "10px" :fontSize "12px" :color "#94a3b8" :marginBottom "8px"}}
-    [:div "Time"] [:div "Counterfactual liquidity"] [:div "Claim-now %"]]
-   (let [mx-liq (apply max 1 (map :liq counterfactual))]
-     (for [{:keys [t liq claim-now]} counterfactual]
+    [:div "Time"] [:div "Illustrative liquidity"] [:div "Claim-now %"]]
+   (let [mx-liq (apply max 1 (map :liq illustrative-stress))]
+     (for [{:keys [t liq claim-now]} illustrative-stress]
        [:div {:style {:display "grid" :gridTemplateColumns "80px 1fr 140px" :gap "10px" :alignItems "center" :marginBottom "7px"}}
         [:div {:style {:color "#7ADDDC" :fontWeight 700}} t]
         (bar liq mx-liq "#22c55e")
         [:div {:style {:color "#22c55e" :fontWeight 700}} (str claim-now "%")]]))]
 
-  [:h2 {:style {:color "#03DAC6" :fontSize "28px" :marginTop "26px"}} "Scene 5 — Evidence output"]
+  [:h2 {:style {:color "#03DAC6" :fontSize "28px" :marginTop "26px"}} "Scene 5 — Not an evidence output"]
   [:div {:style {:background "#0f172a" :border "1px solid #004D59" :borderRadius "8px" :padding "14px"}}
    [:ul
-    [:li "Liquidity stress artifact"]
-    [:li "Settlement degradation metrics"]
-    [:li "Claimability timeline"]
-    [:li "Latency and recovery curve snapshots"]]]
+    [:li "Static liquidity stress labels; no measured artifact"]
+    [:li "No executed settlement metrics"]
+    [:li "No observed claimability timeline"]
+    [:li "No measured latency or recovery snapshots"]]]
 
   [:h2 {:style {:color "#03DAC6" :fontSize "28px" :marginTop "26px"}} "Final insight"]
   [:div {:style {:background "#0f172a" :border "1px solid #03DAC6" :borderRadius "8px" :padding "14px"}}
