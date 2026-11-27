@@ -103,6 +103,8 @@
      :retry-attempts (event-requested :retry)
      :attempted-request-total (reduce + 0 (map :requested
                                               (filter #(= :withdraw-request (:event %)) events)))
+     :synthetic-failed-payment-attempts
+     (count (filter #(= :simulate-payment-failure (:event %)) events))
      :principal-conserved? (= (:total-principal state) (+ paid outstanding))
      :outstanding-partitioned? (= outstanding (+ rights unrequested))
      :rights (into (sorted-map-by #(compare (str %1) (str %2)))
@@ -157,6 +159,22 @@
                                  :positions positions)
                           (update :events conj event))]
           (refresh-accounting updated)))
+
+      :simulate-payment-failure
+      (let [user (:user event)
+            right-id (:right/id event)
+            amount (:amount event)
+            right (get-in state [:rights right-id])]
+        (when-not (and right (= user (:user right))
+                       (integer? amount) (pos? amount)
+                       (<= amount (:outstanding right)))
+          (throw (ex-info "synthetic payment failure must identify an existing right and valid amount"
+                          {:event event :outstanding-right right})))
+        ;; This is a deterministic teaching event, not a token-transfer call.
+        ;; It records an injected failure and deliberately changes no balances.
+        (-> state
+            (assoc :phase-label "after synthetic payment failure")
+            (update :events conj event)))
 
       :withdraw-request
       (let [user (:user event)
@@ -339,6 +357,8 @@
                                     :deposit (str "+" (:amount e) " USDC")
                                     :accrue "5% APY for 1 year"
                                     :set-liquidity-shortfall (str "available-ratio = " (:available-ratio e))
+                                    :simulate-payment-failure (str "synthetic failure on " (:right/id e)
+                                                                   " for " (:amount e) " USDC; no transfer executed")
                                     :withdraw-request (str (name (or (:request-kind e) :opening)) " "
                                                            (:right/id e) ": requested " (:requested e) " USDC")
                                     (str e))]

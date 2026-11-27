@@ -57,6 +57,9 @@
    {:event :withdraw-request :user :cara :right/id "cara-opening-1" :request-kind :opening :requested 500}
    ;; Liquidity recovers to 90% — previously reserved funds become accessible
    {:event :set-liquidity-shortfall :available-ratio 0.90}
+   ;; Synthetic no-op marker: no transfer is executed or observed.
+   {:event :simulate-payment-failure :user :bob
+    :right/id "bob-opening-1" :amount 200}
    ;; Wave 2: users claim more of their remaining principal
    {:event :withdraw-request :wave 2 :user :alice :right/id "alice-opening-1" :request-kind :retry :requested 600}
    {:event :withdraw-request :wave 2 :user :bob :right/id "bob-opening-1" :request-kind :retry :requested 200}
@@ -190,7 +193,7 @@
                    :borderRadius "8px" :padding "16px" :marginTop "16px"}}
      [:h3 {:style {:color "#f8fafc" :marginTop 0}} "Wave 2 — Users claim remaining principal"]
      [:p {:style {:color "#cbd5e1" :fontSize "14px"}}
-      "The recovery adds 1,125 USDC of liquidity. Alice retries 600 on her existing right; Bob retries 200 on his existing right and separately opens a new 250 request; Cara retries 300. The sequential teaching model allocates integer payouts across attempts; the 1,125 is pool liquidity, not a promise that each request is paid in full."]
+      "The recovery adds 1,125 USDC of liquidity. A synthetic failure marker first records a no-op on Bob's existing 200 right; it changes no balance and executes no transfer. Alice then retries 600 on her existing right; Bob retries 200 on that same right and separately opens a new 250 request; Cara retries 300. The sequential teaching model allocates integer payouts across attempts; the 1,125 is pool liquidity, not a promise that each request is paid in full."]
      [:div {:style {:marginTop "8px"}}
       (clerk/table (demo/withdrawal-outcomes wave2))]
      [:div {:style {:marginTop "12px" :padding "8px 12px"

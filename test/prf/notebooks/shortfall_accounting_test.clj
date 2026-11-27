@@ -81,3 +81,32 @@
   (is (thrown? clojure.lang.ExceptionInfo
         (demo/run-scenario (into first-wave
           [{:event :withdraw-request :user :bob :right/id "b-new" :request-kind :new :requested 251}])))))
+
+(deftest synthetic-payment-failure-preserves-right-until-retry
+  (let [failed-events (into first-wave
+                        [{:event :simulate-payment-failure :user :bob
+                          :right/id "b" :amount 200}])
+        before (demo/accounting-summary (demo/run-scenario first-wave))
+        before-state (:final-state (demo/run-scenario first-wave))
+        after-failure (demo/run-scenario failed-events)
+        failed-state (:final-state after-failure)
+        failed-summary (demo/accounting-summary after-failure)
+        recovered-events (into failed-events
+                           [{:event :set-liquidity-shortfall :available-ratio 0.9}
+                            {:event :withdraw-request :user :bob :right/id "b"
+                             :request-kind :retry :requested 200}])
+        after-retry (demo/accounting-summary (demo/run-scenario recovered-events))]
+    (is (= (:cumulative-paid before) (:cumulative-paid failed-summary)))
+    (is (= (:outstanding-principal before) (:outstanding-principal failed-summary)))
+    (is (= (:rights before) (:rights failed-summary)))
+    (is (= (:unrequested-principal before) (:unrequested-principal failed-summary)))
+    (is (= (:available-liquidity before-state) (:available-liquidity failed-state)))
+    (is (= (:positions before-state) (:positions failed-state)))
+    (is (= 1 (:synthetic-failed-payment-attempts failed-summary)))
+    (is (= 0 (get-in after-retry [:rights "b" :outstanding])))
+    (is (= 600 (get-in after-retry [:rights "a" :outstanding])))
+    (is (= 300 (get-in after-retry [:rights "c" :outstanding])))
+    (is (nil? (get-in after-retry [:rights "b-new"])))
+    (is (= 1100 (:cumulative-paid after-retry)))
+    (is (= 1150 (:outstanding-principal after-retry)))
+    (is (:principal-conserved? after-retry))))
